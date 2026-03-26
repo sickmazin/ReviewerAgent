@@ -82,11 +82,18 @@ class UnsupervisedEngine:
         return dist
 
 class HybridInsightSystem:
-    def __init__(self, model_path=None, category_centroid=None):
+    def __init__(self, model_path=None, category_centroid=None, device=None):
+        self.device = device if device else torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-small")
-        self.model = InsightScorer()
-        if model_path:
-            self.model.load_state_dict(torch.load(model_path))
+        self.model = InsightScorer().to(self.device)
+        
+        if model_path and os.path.exists(model_path):
+            print(f"Loading fine-tuned model from {model_path}...")
+            state_dict = torch.load(model_path, map_location=self.device)
+            self.model.load_state_dict(state_dict)
+        elif model_path:
+            print(f"Warning: model_path {model_path} not found. Using default weights.")
+            
         self.model.eval()
         self.engine = UnsupervisedEngine(category_centroid)
 
@@ -96,6 +103,7 @@ class HybridInsightSystem:
         S_final = (S_model * (1 - Subj)) + (S_votes * w1) + (S_density * w2) + (S_gain * w3)
         """
         inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
         
         with torch.no_grad():
             s_model, subj, aspects, emb = self.model(inputs['input_ids'], inputs['attention_mask'])
@@ -116,25 +124,33 @@ class HybridInsightSystem:
         # 3. Bonus per information gain (unicità dell'informazione)
         # 4. Bias positivo per i voti della community
         
-        final_score = (s_model.item() * w_subj * 0.5) + \
-                      (lex_density * 30) + \
-                      (info_gain * 20) + \
-                      (w_votes * 5)
+        final_score = (s_model.item() * w_subj * 1.5) + \
+                      (lex_density * 0.8) + \
+                      (info_gain * 0.1) + \
+                      (w_votes * 0.55)
         
         return np.clip(final_score, 0, 100)
 
 # Esempio di utilizzo e test rapido
 if __name__ == "__main__":
+    MODEL_PATH = "models/insight_model_epoch_67.pth"
+    
     # Mock category centroid (embedding medio di 768 dim per DeBERTa small)
     mock_centroid = np.random.randn(768)
     
-    system = HybridInsightSystem(category_centroid=mock_centroid)
+    # Inizializzazione con il modello fine-tuned
+    system = HybridInsightSystem(model_path=MODEL_PATH, category_centroid=mock_centroid)
     
-    review_alta = "The lens has an aperture of f/1.8 with 9 rounded blades, providing excellent bokeh. The chromatic aberration is minimal even at wide open settings. Build quality is robust, mostly magnesium alloy."
-    review_bassa = "Great product, I love it! Fast shipping."
+    review_alta = '''
+        Queste infradito Cressi Saint-Tropez sono state una bellissima scoperta, rivelandosi un prodotto di ottima fattura che unisce l'affidabilità del marchio a un design moderno e vivace. La prima cosa che colpisce è l'abbinamento cromatico, in particolare la tonalità azzurrina: è un colore fresco, prettamente estivo e luminoso che risalta tantissimo. Nonostante siano pensate per bambine e ragazze, la calzata è generosa e versatile, risultando perfetta anche per un piede adulto che oscilla tra il 36 e il 37, garantendo un appoggio naturale e stabile.
+        Dal punto di vista tecnico, la qualità dei materiali è evidente. Il plantare in gomma è compatto e sostiene bene il piede senza cedere sul tallone, mentre il cinturino a Y è incastrato saldamente nella suola, trasmettendo una sensazione di robustezza superiore rispetto ai modelli economici. Sono incredibilmente leggere e occupano pochissimo spazio nella borsa, ma non sacrificano la sicurezza: la suola ruvida offre un ottimo grip antiscivolo, fondamentale per muoversi senza timore su superfici bagnate o negli spogliatoi della palestra.
+        Il comfort è assoluto anche dopo molte ore di utilizzo; il separatore tra le dita è morbido e sottile, il che permette di usarle per lunghe passeggiate sulla spiaggia senza il rischio di fastidiose vesciche. Essendo realizzate con materiali resistenti all'acqua, si asciugano in un lampo e sono semplicissime da pulire. Anche se il prezzo può sembrare leggermente più alto della media, la durata nel tempo e la cura dei dettagli giustificano pienamente l'investimento. Sono diventate le compagne inseparabili per il mare e la doccia, promosse a pieni voti per praticità e stile.
+    '''
+    review_bassa = "Belle, semplice e spedizione veloce."
     
-    score_high = system.compute_score(review_alta, helpful_votes_proxy=45)
-    score_low = system.compute_score(review_bassa, helpful_votes_proxy=1)
+    score_high = system.compute_score(review_alta, helpful_votes_proxy=0)
+    score_low = system.compute_score(review_bassa, helpful_votes_proxy=0)
     
+    print(f"\nModel: {'Fine-tuned' if os.path.exists(MODEL_PATH) else 'Default DeBERTa'}")
     print(f"Insight Score (High Quality): {score_high:.2f}/100")
     print(f"Insight Score (Low Quality): {score_low:.2f}/100")
