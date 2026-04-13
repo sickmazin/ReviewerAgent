@@ -7,99 +7,144 @@ import os
 
 # --- CONFIGURAZIONE ---
 MODEL_NAME = "gemma3:12b"
-INPUT_CSV = "datasets/amazon_reviews_5M_random.csv"
-OUTPUT_CSV = "datasets/amazon_reviews_silver_labels_5M.csv"
-SAMPLE_SIZE = 50000
+INPUT_AMAZON = "datasets/amazon_reviews_5M_random.csv"
+INPUT_RESTAURANT = "datasets/Restaurant reviews.csv"
+INPUT_BNB = "datasets/airbnb_reviews.csv"  # Nuovo dataset BnB
+OUTPUT_CSV = "datasets/reviews_labeled.csv"
+SAMPLE_SIZE = 500000
 
-# --- 1. DEFINIZIONE DELLO SCHEMA (Structured Output) ---
-# Utilizziamo Pydantic per forzare e validare l'output del modello a livello di libreria
+# Mappatura criteri specifici per dominio
+DOMAIN_KNOWLEDGE = {
+    "Books": "Focus on narrative structure, character arc consistency, stylistic nuances, and thematic execution (avoid spoilers).",
+    "Electronics": "Focus on real-world performance (latency, thermals), build tolerances, battery cycle reliability, and UI/UX stability.",
+    "Home": "Focus on structural integrity, material degradation over time, ergonomic utility, and assembly precision.",
+    "Clothing": "Focus on textile density, seam reinforcement (stitching), fit consistency (true-to-size), and color fastness after washing.",
+    "Toys": "Focus on mechanical safety, material non-toxicity, impact resistance (durability), and cognitive engagement levels.",
+    "Movies": "Focus on structural pacing, visual composition (cinematography), performative depth, and audio-visual coherence.",
+    "Pet": "Focus on biocompatibility (ingredients), durability against biting/scratching, behavioral impact, and ease of sanitation.",
+    "Sports": "Focus on biomechanical support, thermal regulation (breathability), grip coefficient, and weight-to-strength ratio.",
+    "Beauty": "Focus on chemical formulation impact (pH, allergens), absorption rates, hypoallergenic properties, and cumulative aesthetic results.",
+    "Health": "Focus on bioavailability, symptomatic relief precision, secondary effects, and clarity of the administration protocol.",
+    "restaurant": "Focus on food quality (organoleptic properties), service efficiency (latency), price-to-quantity ratio, and environmental hygiene.",
+    "bnb": "Focus on listing accuracy vs reality, host responsiveness, cleanliness standards, acoustic/thermal comfort, and neighborhood accessibility."
+}
+DEFAULT_CRITERIA = "Focus on specific usage scenarios, measurable facts, and actionable pros/cons."
+
 class ReviewEvaluation(BaseModel):
-    insight_score: int = Field(description="Un numero intero da 0 a 100 che indica l'utilità e il livello di dettaglio della recensione.")
-    reasoning: str = Field(description="Una breve motivazione per il punteggio assegnato.")
+    insight_score: int = Field(description="Score 0-100 basato sulla densità informativa specifica per la categoria.")
+    reasoning: str = Field(description="Breve analisi dei punti chiave identificati.")
 
-# --- 2. INIZIALIZZAZIONE MODELLO ---
-# Usiamo ChatOllama che supporta nativamente il binding degli schemi
-llm = ChatOllama(model=MODEL_NAME, temperature=0)
+llm = ChatOllama(model=MODEL_NAME, temperature=0.7)
 structured_llm = llm.with_structured_output(ReviewEvaluation)
 
-# --- 3. DEFINIZIONE DEL PROMPT ---
+# Buffer per la "memoria" dei punteggi recenti
+recent_scores = []
+
+# Prompt Dinamico con Memoria e Rating
 prompt = ChatPromptTemplate.from_messages([
     ("system", """
-        Sei un Analista Strategico di Feedback specializzato nella quantificazione della qualità informativa delle recensioni. Il tuo unico compito è assegnare un Insightfulness Score (0-100) basato esclusivamente sul valore intrinseco dei dati forniti nel testo.
-        Parametri di Valutazione (Algoritmo Interno):
-        Per determinare lo score, analizza la presenza dei seguenti elementi (senza citarli nell'output):
-        * Densità Tecnica: Presenza di parametri misurabili, materiali, compatibilità o dettagli costruttivi (Alto impatto).
-        * Contesto d'Uso: Descrizione dello scenario di utilizzo, durata del test e problemi specifici riscontrati (Alto impatto).
-        * Analisi Comparativa: Confronto con prodotti simili o standard di categoria (Medio impatto).
-        * Rilevanza Pura: Una recensione che parla di prezzo, spedizione o imballaggio deve subire una penalizzazione drastica dello score, poiché tali informazioni non riguardano la qualità del prodotto.
-        Distribuzione del Punteggio:
-        * [0-24] Poor (o): Testi brevi, generici ("ottimo", "non funziona") o focalizzati su logistica/prezzo.
-        * [25-49] Fair (X): Descrizione base, opinione soggettiva senza prove concrete o dettagli tecnici.
-        * [50-74] Good (A): Buona narrazione dell'esperienza, contesto chiaro, utile per un potenziale acquirente. Fornisce caratteristiche parziali del prodotto.
-        * [75-100] Excellent: Analisi da esperto, ricca di dettagli unici, pro e contro bilanciati e specifiche tecniche approfondite. Solo questi punteggi indicano una recensione di alto profilo.
-        Formato di Risposta (Rigido):
-            Insightfulness:  tra 0 e 100
-        Inoltre impara dalle risposte precedenti, e si omogeneo nelle risposte. Non dare sempre lo stesso score anche con testi totalmente differenti.
+        Sei un Analista Senior di Feedback. Valuta la recensione considerando CATEGORIA e CRITERI dell'utente.
+        L'Insightfulness Score (0-100) misura quanto la recensione sia utile per una decisione d'acquisto o di soggiorno razionale.
+        
+        Linee guida per la distribuzione:
+        - Usa l'intera scala 0-100 con massima precisione .
+        - EVITA assolutamente di restituire sempre gli stessi valori o arrotondare ai multipli di 5.
+        - Se vedi che i punteggi recenti sono troppo simili, sforzati di essere più granulare.
+        
+        Criteri:
+        - Low Insight: Menzioni di logistica generica, prezzo senza contesto, o commenti tautologici (es. "Tutto bene").
+        - High Insight: Analisi tecnica, scenari d'uso, pro/contro misurabili, dettagli spaziali o comportamentali (host). 
+        
+        Dominio: {category}
+        Criteri Specifici: {criteria}
+        Punteggi assegnati recentemente (per coerenza distributiva): {history}
     """),
-    ("human", "Analizza questa recensione e restituisci lo score e il ragionamento:\n\n{review_text}")
+    ("human", "Recensione da analizzare:\n\n{review_text}")
 ])
 
 chain = prompt | structured_llm
 
-def get_score_from_llm(text):
-    """Interroga il modello e ottiene l'oggetto Pydantic validato"""
-    if not isinstance(text, str) or len(text.strip()) < 5:
-        return 50
+def get_score_from_llm(text, category, rating):
+    global recent_scores
+    if not isinstance(text, str) or len(text.strip()) < 20:
+        return 15
         
+    criteria = DOMAIN_KNOWLEDGE.get(category, DEFAULT_CRITERIA)
+    history_str = ", ".join(map(str, recent_scores[-10:])) if recent_scores else "Nessuno"
+    
     try:
-        # LangChain gestisce internamente la richiesta JSON e il parsing nel modello Pydantic
-        result = chain.invoke({"review_text": text[:1500]})
+        result = chain.invoke({
+            "review_text": text[:1500], 
+            "category": category, 
+            "criteria": criteria,
+            "rating": rating,
+            "history": history_str
+        })
+        score = min(100, max(0, result.insight_score))
         
-        if result and hasattr(result, 'insight_score'):
-            return min(100, max(0, result.insight_score))
-        return 50
+        # Aggiorna memoria
+        recent_scores.append(score)
+        if len(recent_scores) > 50: recent_scores.pop(0)
+        
+        return score
     except Exception as e:
-        print(f"\nErrore di validazione o parsing: {e}")
-        return 50
+        print(f"Exception: {e}. Inserisco 50.")
 
-def process_dataset():
-    if not os.path.exists(INPUT_CSV):
-        print(f"File {INPUT_CSV} non trovato.")
-        return
 
-    print(f"Caricamento dataset: {INPUT_CSV}")
-    df = pd.read_csv(INPUT_CSV, usecols=['text', 'helpful_vote', 'rating', 'category'])
+def process_dataset(source="restaurant"):
+    """
+    Carica il dataset specificato e appende i risultati allo schema unificato.
+    source: 'restaurant', 'amazon' o 'bnb'
+    """
+    # Schema ordinato come l'header del file CSV
+    target_cols = ['text', 'helpful_vote', 'rating', 'category', 'insight_score']
     
-    # Campionamento
+    if source == "restaurant":
+        if not os.path.exists(INPUT_RESTAURANT):
+            print(f"File {INPUT_RESTAURANT} non trovato.")
+            return
+        df = pd.read_csv(INPUT_RESTAURANT, usecols=['text', 'Rating'])
+        df = df.rename(columns={'Rating': 'rating'})
+        df['category'] = 'restaurant'
+        df['helpful_vote'] = 0
+    elif source == "bnb":
+        if not os.path.exists(INPUT_BNB):
+            print(f"File {INPUT_BNB} non trovato.")
+            return
+        # Header bnb: listing_id,id,date,reviewer_id,reviewer_name,comments
+        df = pd.read_csv(INPUT_BNB, usecols=['comments'])
+        df.drop(df.head(30000).index,inplace=True)
+        df = df.rename(columns={'comments': 'text'})
+        df['category'] = 'bnb'
+        df['rating'] = 0
+        df['helpful_vote'] = 0
+    else:
+        if not os.path.exists(INPUT_AMAZON):
+            print(f"File {INPUT_AMAZON} non trovato.")
+            return
+        df = pd.read_csv(INPUT_AMAZON, usecols=['text', 'helpful_vote', 'category', 'rating'])
+
     df_sample = df.sample(n=min(SAMPLE_SIZE, len(df))).copy()
-    df_sample = df_sample[df_sample['text'].str.len() > 20]
-    
-    print(f"Inizio elaborazione ({len(df_sample)} recensioni). Salvataggio incrementale attivo...")
-    
-    # Se il file esiste, lo consideriamo già iniziato, quindi non scriviamo l'header
     file_exists = os.path.exists(OUTPUT_CSV)
     
-    # Iterazione riga per riga per salvataggio incrementale
-    for index, row in tqdm(df_sample.iterrows(), total=len(df_sample)):
-        text = row['text']
-        score = get_score_from_llm(text)
+    for _, row in tqdm(df_sample.iterrows(), total=len(df_sample), desc=f"Processing {source}"):
+        category = row['category'] if pd.notnull(row.get('category')) else "general"
+        rating = row['rating'] if pd.notnull(row.get('rating')) else 0
+        score = get_score_from_llm(row['text'], category, rating)
         
-        # Creiamo un dictionary per la riga corrente e aggiungiamo lo score
-        row_data = row.to_dict()
-        row_data['insight_score'] = score
+        row_data = {
+            'text': row['text'],
+            'helpful_vote': row['helpful_vote'] if pd.notnull(row.get('helpful_vote')) else 0,
+            'rating': rating,
+            'category': category,
+            'insight_score': score
+        }
         
-        # Convertiamo in DataFrame per sfruttare il to_csv in append
-        df_row = pd.DataFrame([row_data])
-        df_row.to_csv(
-            OUTPUT_CSV, 
-            mode='a', 
-            index=False, 
-            header=not file_exists, 
-            encoding='utf-8'
-        )
-        file_exists = True # Dopo la prima scrittura, non inserire più l'header
-
-    print(f"\nElaborazione terminata! Dati salvati riga per riga in: {OUTPUT_CSV}")
+        # Creazione DataFrame con colonne esplicite e ordinamento coerente
+        df_row = pd.DataFrame([row_data], columns=target_cols)
+        df_row.to_csv(OUTPUT_CSV, mode='a', index=False, header=not file_exists, encoding='utf-8')
+        file_exists = True
 
 if __name__ == "__main__":
-    process_dataset()
+    # Esempio di esecuzione per BnB
+    process_dataset(source="bnb")
