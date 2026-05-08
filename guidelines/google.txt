@@ -1,0 +1,247 @@
+Norme relative ai contenuti generati dagli utenti di Maps
+L'impegno di Google è rivolto ad aiutarti a scoprire il mondo che ti circonda. I contenuti generati dagli utenti sui nostri servizi hanno lo scopo di migliorare la tua esperienza e aiutarti a visualizzare l'anteprima dei luoghi nelle vicinanze o in tutto il mondo ed esplorarli. Ci impegniamo al massimo per far sì che i contenuti pubblicati dai nostri utenti siano utili e rispecchino il mondo reale.
+
+Se contribuisci a Maps, potresti diventare Local Guide. Come Local Guide, ricevi un badge o un'icona, guadagni punti e raggiungi un livello, in base alla quantità di contenuti con cui contribuisci. Potresti avere diritto a ricevere vantaggi come inviti a eventi. Puoi attivare la ricezione di comunicazioni via email relative a queste opportunità. Per scoprire di più sul programma Local Guides, consulta i Termini e condizioni del programma Local Guides.
+
+Le norme relative ai contenuti di Google per i contenuti generati dagli utenti di Maps sono pensate per contribuire a garantire un'esperienza positiva a tutti gli utenti che visualizzano i contenuti forniti, il tutto mantenendo la correttezza e l'affidabilità di Maps. La maggior parte dei milioni di contributi che riceviamo ogni giorno è autentica e precisa ma, a volte, i contenuti che riceviamo violano le norme. Per individuare questi contenuti e impedire che altre persone li vedano, utilizziamo una combinazione di risorse umane e algoritmi di machine learning. Queste norme descrivono i criteri per la pubblicazione di contenuti generati dagli utenti su Maps e per la gestione dei contenuti inappropriati o che violano le norme.
+
+Ad esempio, i post o le modifiche devono essere basati su esperienze e informazioni reali. Tra gli esempi di violazioni delle nostre norme, contenuti volutamente falsi, foto copiate o rubate, recensioni fuori tema, espressioni diffamatorie, attacchi personali e qualsiasi contenuto non necessario o inesatto. In genere, rimuoviamo interamente i post (ad es. un post con foto con una recensione) anche se solo una parte viola le nostre norme. Per scoprire quali contenuti sono consentiti o vietati, consulta l'articolo Contenuti vietati e con limitazioni. Se trovi contenuti soggettivi (ad es. recensioni, contenuti multimediali, domande o risposte) o profili che ritieni violino le nostre norme o le normative vigenti, consulta le norme relative ai contenuti inappropriati e per le segnalazioni e le norme per il profilo dell'utente inappropriato per intervenire.
+
+Se le modifiche suggerite sono collocate in modo errato sulla mappa o sono associate in modo errato a un luogo, il contributo potrebbe essere rifiutato. Per monitorare la modifica, puoi controllare il luogo sulla mappa. Poiché abbiamo altre fonti che potrebbero sovrascrivere modifiche e ricorsi approvati, le modifiche potrebbero non essere visualizzate. Se sei il proprietario di un luogo, scopri come aggiungere o rivendicare la proprietà del profilo dell'attività su Google. Se individui informazioni fuorvianti o attività fraudolente su Google Maps relative a informazioni fattuali disponibili pubblicamente, puoi modificarle. Scopri di più su come modificare le informazioni sull'attività in Google Maps. Se il luogo viola le norme sopra citate in precedenza o le norme sull'idoneità per attività e luoghi, le relative informazioni potrebbero essere rimosse da Google Maps e non essere pubblicate nuovamente.
+
+Per rilevare contenuti che violano le norme, i nostri algoritmi di machine learning analizzano i contributi per rilevare eventuali attività sospette degli utenti. I contenuti che violano le norme vengono rimossi dai nostri modelli automatici o segnalati per un'ulteriore revisione da parte di operatori e analisti qualificati che effettuano valutazioni dei contenuti difficilmente eseguibili dai soli algoritmi. Rimuoviamo i contenuti se violano le nostre norme o i nostri termini di servizio oppure per rispettare gli obblighi di legge.
+
+Per impedire agli utenti di trovare contenuti inappropriati, implementiamo molti altri strumenti, come la sospensione dei contenuti generati dagli utenti per luoghi, aree geografiche e categorie di luoghi specifici. Queste misure possono essere implementate in modo reattivo o proattivo per contrastare un aumento di contenuti che violano le nostre norme. Potremmo rimuovere i contenuti generati dagli utenti, limitare l'accesso alle funzionalità o sospendere gli Account Google che violano le nostre norme a livello globale e in modo permanente. La rimozione di contenuti, il rifiuto di apportare modifiche o la limitazione dell'accesso alle funzionalità impediranno la visualizzazione dei contenuti caricati ad altri utenti. Se il tuo Account Google non può accedere alle funzionalità di Maps o non può inviare contributi, non potrai usare queste funzionalità in nessun luogo in tutto il mondo.
+
+Ricontrolla di tanto in tanto, perché potremmo aggiornare le nostre norme.
+
+Contenuti vietati e con limitazioni
+Contenuti e comportamenti falsi e ingannevoli
+Recensioni e contenuti falsi e ingannevoli
+Google prende molto sul serio i contenuti falsi e ingannevoli. I contributi su Google Maps devono riflettere un'esperienza autentica in un luogo o un'attività. Una recensione o una valutazione deve riflettere un'esperienza reale con un'attività ed essere autentica e obiettiva. L'identificazione e la rimozione di contenuti falsi o tendenziosi, così come di ogni tentativo di manipolazione delle valutazioni ci permettono di preservare l'affidabilità e l'utilità di Maps.
+ Coinvolgimento fasullo
+I contributi su Google Maps devono riflettere un'esperienza autentica in un luogo o un'attività. Il coinvolgimento fasullo non è consentito e i contenuti verranno rimossi.
+
+È incluso quanto segue:
+
+Contenuti non basati su un'esperienza reale o che non rappresentano in modo accurato la località o il prodotto in questione.
+Recensioni o valutazioni pagate, direttamente o in natura.
+Contenuti che sono stati pubblicati da più account da o su richiesta di una persona.
+Contenuti che sono stati pubblicati utilizzando un emulatore o un altro servizio di manomissione del dispositivo, un sistema operativo modificato o un altro metodo per simulare un coinvolgimento autentico, manipolare i dati o i risultati dei sensori oppure impedire o confondere in altro modo le normali operazioni.
+Non consentiamo ai commercianti o agli utenti di:
+
+Sollecitare o incoraggiare la pubblicazione di contenuti che non rappresentano un'esperienza autentica.
+Offrire incentivi, come pagamento, sconti, prodotti e/o servizi senza costi, in cambio della pubblicazione di una recensione o della revisione o rimozione di una recensione negativa.
+Pubblicare contenuti sul luogo o sull'attività di un concorrente per compromettere la reputazione di quell'attività o di quel prodotto.
+Manipolazione delle valutazioni
+I contributi su Google Maps devono riflettere un'esperienza autentica in un luogo o un'attività. La manipolazione delle valutazioni include recensioni incentivate o tendenziose, che non sono consentite e verranno rimosse da Maps.
+È incluso quanto segue:
+
+Contenuti pubblicati in cambio di un incentivo offerto da un'attività, come pagamento, sconti, beni e/o servizi senza costi.
+Sono inclusi i contenuti pubblicati a seguito di richieste di revisione o rimozione di una recensione o di una valutazione in cambio di un incentivo.
+Contenuti che mostrano volumi o schemi insoliti di contributi alle recensioni e indicano tentativi di manipolazione della valutazione di un luogo.
+Contenuti basati su un conflitto di interessi. Un conflitto di interesse può includere un impiego attuale o precedente, un rapporto contrattuale o di consulenza o altre affiliazioni professionali o personali che dimostrano un conflitto di interesse, ad esempio concorrenti nel settore, rapporti familiari e così via).
+Non consentiamo ai commercianti di:
+
+Offrire incentivi, come pagamento, sconti, prodotti e/o servizi senza costi, in cambio della pubblicazione di una recensione o della revisione o rimozione di una recensione negativa.
+Scoraggiare o vietare le recensioni negative oppure sollecitare selettivamente recensioni positive da parte dei clienti.
+Quando sollecitano recensioni, i commercianti non devono richiedere o fare pressione sugli utenti affinché lascino valutazioni o scrivano recensioni mentre si trovano nei locali né devono chiedere di includere contenuti specifici.
+
+È incluso quanto segue:
+Commercianti che richiedono al personale di sollecitare un determinato numero di recensioni.
+Commercianti che richiedono al personale di sollecitare recensioni con contenuti specifici, inclusi quelli che identificano un membro del personale.
+Consentiamo ai commercianti di:
+
+Sollecitare o incoraggiare la pubblicazione di contenuti che rappresentino un'esperienza autentica, senza offrire incentivi per farlo o tentare di influenzare la valutazione o i contenuti della recensione.
+Furto d'identità
+L'utilizzo di Google Maps per ingannare altre persone è in contrasto con l'idea di fornire informazioni utili per aiutare gli utenti a esplorare il mondo che li circonda. Non utilizzare Google Maps per rubare l'identità di una persona, un gruppo o un'organizzazione.
+
+È incluso quanto segue:
+
+Contenuti pubblicati o condivisi con l'obiettivo di rubare l'identità di una persona, un gruppo o un'organizzazione.
+Falsa dichiarazione rispetto alla provenienza di contenuti da una fonte autorevole verificata.
+Sono consentiti contenuti che includono nomi alternativi per una persona o un'organizzazione e che non tentano di ingannare gli altri.
+
+Disinformazione
+Informazioni false, imprecise o ingannevoli possono causare danni significativi a privati, attività e società. Per questo motivo, non consentiamo agli utenti di pubblicare contenuti che veicolano disinformazione.
+
+È incluso quanto segue:
+
+Contenuti dannosi con informazioni sanitarie o mediche ingannevoli o fuorvianti.
+Contenuti dannosi con informazioni ingannevoli o fuorvianti relative a processi di carattere civico.
+Contenuti dannosi, relativi a questioni di carattere civico o eventi importanti, manipolati allo scopo di ingannare o fuorviare gli utenti.
+Sono tuttavia consentiti i contenuti provenienti da fonti autorevoli verificabili.
+
+Rappresentazione ingannevole
+Contenuti fuorvianti possono influire sulla qualità delle informazioni su Google Maps. Per questo motivo, non consentiamo a privati di utilizzare Google Maps per ingannare o fuorviare altri soggetti, o a scopo di rappresentazione ingannevole.
+
+È incluso quanto segue:
+
+Considerazioni false o fuorvianti relative alla descrizione o alla qualità di un bene o servizio.
+Distorsione o omissione di dati oggettivi allo scopo di frodare altri utenti.
+Distorsione o omissione di informazioni che potrebbero avere un impatto indebito sul processo decisionale degli utenti.
+Contenuti basati su un conflitto di interessi. Un conflitto di interesse può includere un impiego attuale o precedente, un rapporto contrattuale o di consulenza o altre affiliazioni professionali o personali che dimostrano un conflitto di interesse.
+Pubblicazione di contenuti che inducono con l'inganno gli utenti a rivelare informazioni confidenziali, scaricare software indesiderato o dannoso oppure li assoggettano a phishing o baiting.
+Contenuti e comportamenti inappropriati
+Molestie
+Non consentiamo agli utenti di pubblicare contenuti finalizzati a molestare altre persone o attività oppure a incoraggiare altri a partecipare a molestie.
+
+È incluso quanto segue:
+
+Contenuti che presentano una minaccia specifica di violenza nei confronti di individui o gruppi definiti di persone che potrebbero ragionevolmente indurre una persona a temere per la propria incolumità o integrità fisica o mentale.
+Doxxing.
+Contenuti che implicano la sessualizzazione o l'oggettificazione indesiderata di una persona, incluse dichiarazioni relative ad atti sessuali, orientamento sessuale o identità di genere di una persona.
+Incitamento all'odio
+I prodotti di Google Maps sono progettati per aiutare gli utenti a muoversi all'interno del mondo che li circonda e a esplorarlo. In Google, crediamo che tutte le persone, indipendentemente da gruppo etnico, religione, disabilità, età, nazionalità, status di veterano, orientamento sessuale, genere, identità di genere, casta o qualsiasi altra condizione tutelata, abbiano il diritto di accedere alle informazioni e di partecipare al loro scambio senza essere soggette a comportamenti di incitamento all'odio.
+
+Non pubblicare o condividere contenuti che includono qualsiasi forma di incitamento all'odio.
+
+È incluso quanto segue:
+
+Inviti all'azione diretti per commettere atti di violenza contro individui o gruppi tutelati.
+Contenuti che disumanizzano, sminuiscono o denigrano individui o gruppi sulla base di una caratteristica soggetta a tutela.
+Consentiamo contenuti che includono un riferimento positivo a un individuo o a un gruppo tutelato.
+
+Contenuti offensivi
+Google Maps deve essere un luogo in cui gli utenti si rispettino a vicenda, anche se sono in disaccordo tra loro. Per questo motivo, non consentiamo agli utenti di pubblicare contenuti offensivi.
+
+È incluso quanto segue:
+
+Utilizzo di prodotti Google per attaccare altri individui o gruppi.
+Contenuti chiaramente e volutamente provocatori.
+Accuse infondate di comportamento non etico o di attività criminale.
+Sono tuttavia consentiti contenuti che descrivono esperienze negative in modo rispettoso.
+
+Informazioni personali
+Non distribuire o pubblicare informazioni personali senza consenso. Per informazioni personali si intendono le informazioni che si applicano a una persona identificabile in vita e la cui divulgazione potrebbe comportare il rischio di danni qualora queste vengano compromesse o utilizzate in modo improprio. È incluso quanto segue:
+
+Contenuti che includono informazioni personali di un'altra persona pubblicate senza il suo consenso, ad esempio nome e cognome o cognome, il suo volto in una foto o in un video oppure altre informazioni che sono state segnalate come pubblicate senza consenso.
+Informazioni che consentono l'identificazione personale e altre informazioni personali su di te o su altre persone, incluse informazioni finanziarie, mediche o che consentono l'identificazione personale.
+Consentiamo ai commercianti di pubblicare dati di contatto correlati alla loro attività, tra cui numero di telefono, indirizzo email o handle di social media.
+
+Consentiamo anche la pubblicazione di
+
+Nome di un privato se queste informazioni fanno parte dell'organizzazione aziendale comunemente nota o pubblicizzata
+oppure
+Nome di un privato se si tratta di un professionista a contatto con il pubblico che svolge la propria attività con il proprio nome.
+Sono inclusi:
+Medici, avvocati, agenti immobiliari, promotori finanziari, appaltatori e altri professionisti che esercitano la propria attività con il proprio nome
+CEO e altri dipendenti di livello dirigenziale i cui nomi e le cui relazioni professionali con un luogo sono noti e disponibili pubblicamente
+Se ritieni che le tue informazioni personali siano state pubblicate senza il tuo consenso, segui queste istruzioni per segnalare la recensione.
+
+Oscenità e linguaggio volgare
+Rimuoveremo i contenuti osceni e volgari da Google Maps.
+
+È incluso quanto segue:
+
+Contenuti che utilizzano linguaggio volgare o osceno per offendere altri utenti o enfatizzare le critiche.
+Sono consentiti usi non offensivi di parole che possono essere considerate volgari in altri contesti.
+
+Contenuti sessualmente espliciti
+Google Maps consente agli utenti di esplorare il mondo intorno a loro in modo sicuro. Per questo motivo, non consentiamo contenuti sessualmente espliciti.
+
+È incluso quanto segue:
+
+Contenuti pornografici o che rappresentano atti sessuali, genitali o feticismi a scopo di gratificazione sessuale.
+Contenuti che includono genitali nudi.
+Contenuti che esaltano o promuovono la zoofilia.
+Contenuti che esaltano o promuovono contenuti o comportamenti sessualmente espliciti.
+Potremo consentire contenuti altrimenti considerati sessualmente espliciti a scopi didattici, documentaristici, scientifici o artistici, purché correlati al punto d'interesse e purché vengano fornite informazioni sufficienti per consentire agli utenti di comprenderne il contesto.
+
+Contenuti con temi per adulti
+Su Google Maps gli utenti possono trovare informazioni utili e appropriate. Per questo motivo, non consentiamo contenuti con temi per adulti.
+
+È incluso quanto segue:
+
+Contenuti pornografici non espliciti o qualsiasi contenuto inteso a essere sessualmente gratificante.
+Qualsiasi contenuto che conferisce una connotazione sessuale a oggetti inanimati.
+Contenuti con pose esplicite e sessualmente allusive in cui il soggetto è nudo, sfocato o vestito in modo succinto.
+Contenuti non commerciali correlati a giocattoli sessuali.
+Potremmo consentire contenuti altrimenti considerati con temi per adulti a scopi didattici, documentaristici, scientifici o artistici, purché correlati al punto d'interesse e purché vengano fornite informazioni sufficienti per consentire agli utenti di comprenderne il contesto.
+
+Potremmo inoltre consentire contenuti con persone in abbigliamento succinto, presentate senza una connotazione sessuale.
+
+Potremmo consentire un sito web aziendale legittimo che include contenuti con temi per adulti se l'attività fornisce servizi per adulti pertinenti.
+
+Violenza e spargimenti di sangue
+Su Google Maps, facciamo il possibile per assicurarci che le informazioni che forniamo offrano un'esperienza positiva agli utenti del nostro prodotto. Per questo motivo, non consentiamo contenuti violenti o cruenti che coinvolgono persone o animali.
+
+È incluso quanto segue:
+
+Contenuti violenti o cruenti che coinvolgano persone o animali e che siano sconvolgenti, impressionanti o eccessivi.
+Contenuti con violenza esplicita che include grandi quantità di sangue, lesioni gravi o decessi di animali o persone.
+Contenuti che includono crudeltà su animali.
+Contenuti con limitazioni
+Per pubblicare contenuti relativi ad alcuni prodotti o servizi soggetti a controlli e normative locali, devi attenerti a determinate linee guida. I contenuti che carichi non possono includere inviti all'azione né offerte per la vendita di prodotti o servizi disciplinati da leggi locali; sono inclusi, a titolo esemplificativo, alcol, giochi e scommesse, tabacco, armi, dispositivi medico-sanitari, prodotti farmaceutici regolamentati, servizi per adulti e servizi finanziari.
+
+I contenuti non devono includere:
+
+Link a una pagina di destinazione in cui è possibile acquistare beni o servizi con restrizioni.
+Indirizzi email e/o numeri di telefono da contattare per l'acquisto di beni con restrizioni.
+Offerte promozionali per beni o servizi con restrizioni. Ad esempio, è vietato caricare contenuti che presentano offerte, coupon, informazioni sui prezzi o altre promozioni relative a prodotti o servizi con limitazioni.
+Tieni presente che le raffigurazioni accidentali di questi prodotti sono escluse da queste norme. Ecco alcuni esempi:
+
+Immagini di menu.
+Immagini in cui bevande alcoliche sono raffigurate ma non in primo piano.
+Contenuti pericolosi
+Su Google Maps gli utenti possono comunicare tra loro in modo sicuro. Per questo motivo, non consentiamo agli utenti di pubblicare contenuti pericolosi.
+
+È incluso quanto segue:
+
+Contenuti che promuovono o incoraggiano gravi danni fisici a salute, sicurezza, proprietà, animali o ambiente.
+Contenuti che promuovono attività pericolose che potrebbero causare gravi danni fisici a chi realizza l'attività, a coloro che lo circondano o ad animali.
+Contenuti che incoraggiano i minorenni a partecipare ad attività pericolose o a utilizzare oggetti pericolosi.
+Contenuti che agevolano l'uso improprio di oggetti intrinsecamente pericolosi.
+Contenuti con istruzioni per la creazione o la preparazione di oggetti pericolosi.
+Consentiamo discussioni generali su beni, servizi o attività potenzialmente dannosi o pericolosi, purché non includano la promozione del relativo utilizzo dannoso o istruzioni su come realizzarlo.
+
+Sicurezza dei minori
+Su Google Maps non consentiamo contenuti che mettono a rischio i minori. Non è consentito creare, pubblicare o distribuire contenuti che configurano sfruttamento o abuso nei confronti di minori, nonché utilizzare prodotti o servizi Google per mettere in pericolo i minori.
+
+È incluso quanto segue:
+
+Contenuti che configurano sfruttamento sessuale o connotazione sessuale di minori.
+Contenuti che includono comportamenti volti all'adescamento o che giustificano, esaltano o rappresentano in modo positivo questi comportamenti.
+Contenuti che includono rappresentazioni di abusi su minorenni o che giustificano, esaltano o rappresentano in modo positivo questi abusi.
+Contenuti che mostrano nudità di soggetti evidentemente minorenni, anche se non rientrano nelle precedenti categorie.
+Rimuoveremo i contenuti in violazione e prenderemo i provvedimenti necessari, tra cui la segnalazione alle forze dell'ordine o alle autorità competenti, la limitazione dell'accesso a funzionalità di prodotto e la disattivazione degli account.
+
+In che modo gli utenti possono segnalare le violazioni?
+
+Per segnalare contenuti di un prodotto Google indicanti lo sfruttamento di un minore, fai clic su Segnala abuso. Se trovi contenuti di questo genere altrove su internet, contatta direttamente l'ente appropriato nel tuo paese.
+Se ritieni che un minore sia a rischio di abusi, sfruttamento o traffico oppure che ne sia stato vittima, contatta immediatamente le forze dell'ordine. Se ha già effettuato una segnalazione alle forze dell'ordine, ma hai ancora bisogno di aiuto o temi che un minore sia attualmente a rischio sui nostri prodotti o servizi, o lo sia stato in passato, puoi segnalare il comportamento in questione a Google.
+Contenuti di natura terroristica
+Google Maps vieta i contenuti di natura terroristica e l'utilizzo di questo servizio da parte di organizzazioni terroristiche per qualsiasi scopo, incluso il reclutamento.
+
+È incluso quanto segue:
+
+Contenuti che incitano alla violenza, promuovono atti terroristici o celebrano attacchi terroristici.
+Contenuti creati da gruppi terroristici o per conto di questi ultimi.
+Potremmo consentire contenuti correlati al terrorismo a scopi didattici, documentaristici, scientifici o artistici, purché vengano fornite informazioni sufficienti agli utenti per comprenderne il contesto.
+
+Contenuti fuori tema
+Pubblica solo contenuti basati sulla tua esperienza o domande su esperienze in una località specifica.
+
+Non consentiamo contenuti che includono commenti generali, politici o sociali o invettive personali.
+
+Pubblicità e proposte commerciali
+Non è consentito pubblicare contenuti a scopo pubblicitario o di proposta commerciale.
+
+È incluso quanto segue:
+
+Contenuti promozionali o commerciali.
+Pubblicazione di indirizzi email, numeri di telefono, link a social media o link ad altri siti web nelle tue recensioni.
+Contenuti non chiari e ripetitivi
+Contenuti non chiari
+Non consentiamo la pubblicazione di contenuti non chiari su Google Maps, in quanto compromettono le informazioni utili fornite da Google Maps ai suoi utenti.
+
+È incluso quanto segue:
+
+Pubblicazione di contenuti privi di significato nelle varie lingue, come nel caso di un insieme casuale di caratteri.
+Contenuti ripetitivi
+Non consentiamo la pubblicazione di contenuti ripetitivi su Google Maps, in quanto compromettono le informazioni utili fornite da Google Maps ai suoi utenti.
+È incluso quanto segue:
+Pubblicazione ripetuta degli stessi contenuti dallo stesso account o da più account.
+Deturpazione e danneggiamento
+Non sono ammessi contenuti che mirano a distruggere o danneggiare la presenza digitale di una funzionalità. È inclusa la modifica di informazioni su un luogo per renderlo inappropriato o abbassarne la qualità, come uno scherzo o per esprimere le tue opinioni sociali o politiche.
+Prendi sul serio queste regole. Se il comportamento di un utente di Google Maps all'interno o all'esterno della piattaforma danneggia gli utenti, la community, i dipendenti o l'ecosistema, potremmo adottare provvedimenti che variano dalla sospensione dei privilegi dell'account alla sua chiusura. Quando esaminiamo i contenuti o gli account, prendiamo in considerazione diversi tipi di informazioni, tra cui i contenuti stessi, i dati dell'account, le azioni degli utenti e l'eventuale presenza di un modello di comportamento dannoso e altre informazioni ricavate tramite meccanismi di segnalazione (ove applicabile) e revisioni eseguite periodicamente.

@@ -63,7 +63,7 @@ class ReviewDataset(Dataset):
 
 def train_model(train_csv_path, model_save_path="insight_model_v1.pth", base_model_path=None):
     # Creazione cartella per i checkpoint
-    os.makedirs("models", exist_ok=True)
+    os.makedirs("../../.models",exist_ok=True)
     
     # Inizializzazione Sistema (Carica base_model_path se fornito)
     system = HybridInsightSystem(model_path=base_model_path, device=DEVICE)
@@ -128,17 +128,17 @@ def train_model(train_csv_path, model_save_path="insight_model_v1.pth", base_mod
         print(f"Epoch {epoch+1} completata. Average Loss: {avg_loss:.4f}")
         
         # Salvataggio checkpoint per epoca
-        checkpoint_path = os.path.join("models", f"insight_model_epoch_{epoch+1}.pth")
+        checkpoint_path = os.path.join("../../.models",f"insight_model_epoch_{epoch + 1}.pth")
         torch.save(model.state_dict(), checkpoint_path)
         print(f"Checkpoint salvato: {checkpoint_path}")
 
 # Configurazione Training
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 4
-EPOCHS = 50
-LEARNING_RATE = 3e-5
-TRAIN_PATH= "datasets/amazon_reviews_silver_labels_5M.csv"
-MODEL_NAME="models/insight_model_epoch_17.pth"
+BATCH_SIZE = 24
+EPOCHS = 100
+LEARNING_RATE = 2e-5
+TRAIN_PATH= "../../.datasets/reviews_labeled.csv"
+MODEL_NAME=""
 
 if __name__ == "__main__":
 

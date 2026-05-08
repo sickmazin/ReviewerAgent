@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy
+psycopg2-binary
+pydantic
+transformers
+torch
+langchain-ollama
+langchain-core
+sentence-transformers
+tiktoken
+sentencepiece
+protobuf

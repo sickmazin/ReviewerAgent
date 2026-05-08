@@ -1,13 +1,13 @@
 .idea/
 venv/
-datasets/
-models/
+.datasets/
+.models/
 raw_data/
 .env
 __pycache__/
 *.pyc
 .gemini/
-
+backend/.venv/
 # Logs
 logs
 *.log
@@ -34,3 +34,4 @@ dist-ssr
 *.sw?
 frontend/ATTRIBUTIONS.md
 frontend/guidelines/
+frontend/node_modules/

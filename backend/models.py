@@ -1,13 +1,13 @@
-from marshmallow.fields import Boolean
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON
+import uuid
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON, Boolean
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
-from .database import Base
+from database import Base
 
 class Chat(Base):
     __tablename__ = "chats"
     
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     title = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
@@ -18,7 +18,7 @@ class Review(Base):
     __tablename__ = "reviews"
     
     id = Column(Integer, primary_key=True, index=True)
-    chat_id = Column(Integer, ForeignKey("chats.id"))
+    chat_id = Column(String, ForeignKey("chats.id"))
     
     # Input
     text = Column(String, nullable=False)
@@ -26,16 +26,17 @@ class Review(Base):
     url = Column(String)
     
     # Output del Modello (Insightfulness Analysis)
-    insight_score = Column(Integer,nullable=False)
-    guidelines = Column(Boolean,nullable=False)
-    guidelines = Column(Boolean,nullable=False)
-    gram_errors = Column(Boolean,nullable=False)
+    score = Column(String, nullable=True)  # BAD, GOOD, EXCELLENT
+    is_generic_compliant = Column(Boolean, nullable=True)
+    follow_guidelines = Column(Boolean, nullable=True)
+    grammar_errors = Column(Boolean, nullable=True)
+    title = Column(String, nullable=True)  # Titolo suggerito dalla LLM
 
-    # Reasoning salvato in formato JSONB (Postgres) per massima flessibilità
-    reasoning = Column(JSON)
-    red_error = Column([(Inter,Inter)]) # Lista di coppia di indici (start, fine) evidenziato nel testo
-    yellow_error = Column([(Inter,Inter)]) # Lista di coppia di indici (start, fine) evidenziato nel testo
-    suggests = Column([(Inter,Inter)]) # Lista di coppia di indici (start, fine) evidenziato nel testo
-    
+    # Reasoning e highlights salvati in formato JSON per massima flessibilità
+    reasoning = Column(JSON, nullable=True)  # Motivazione dell'analisi LLM
+    highlights = Column(JSON, nullable=True)  # Struttura completa: text + lista di Issue con indici
+    details = Column(JSON, nullable=True)  # word_count, char_count
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     chat = relationship("Chat", back_populates="reviews")
+

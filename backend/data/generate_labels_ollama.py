@@ -6,7 +6,7 @@ from tqdm import tqdm
 import os
 
 # --- CONFIGURAZIONE ---
-MODEL_NAME = "gemma3:12b"
+MODEL_NAME = "gemma4:26b"
 INPUT_AMAZON = "datasets/amazon_reviews_5M_random.csv"
 INPUT_RESTAURANT = "datasets/Restaurant reviews.csv"
 INPUT_BNB = "datasets/airbnb_reviews.csv"  # Nuovo dataset BnB
@@ -147,4 +147,4 @@ def process_dataset(source="restaurant"):
 
 if __name__ == "__main__":
     # Esempio di esecuzione per BnB
-    process_dataset(source="bnb")
+    process_dataset(source="amazon")

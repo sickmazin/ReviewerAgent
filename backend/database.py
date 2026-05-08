@@ -1,8 +1,9 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # URL di connessione a PostgreSQL
-DATABASE_URL = "postgresql://user:password@localhost:5432/reviewer_agent"
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:password@localhost:5432/reviewer_agent")
 
 engine = create_engine(
     DATABASE_URL, 

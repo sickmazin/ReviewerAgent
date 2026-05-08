@@ -7,7 +7,7 @@ import os
 # --- CONFIGURAZIONE ---
 REPO_ID = "McAuley-Lab/Amazon-Reviews-2023"
 TOTAL_LIMIT = 5_000_000
-OUTPUT_DIR = "datasets"
+OUTPUT_DIR = "../../.datasets"
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "amazon_reviews_5M_random.csv")
 
 if not os.path.exists(OUTPUT_DIR):
