@@ -1,7 +1,7 @@
 .idea/
 venv/
-.datasets/
-.models/
+backend/.datasets/
+backend/.weights/
 raw_data/
 .env
 __pycache__/
@@ -25,6 +25,8 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+.antigravitycli
+AGENTS.md
 .idea
 .DS_Store
 *.suo

@@ -1,0 +1,21 @@
+{
+  "welcome_title": "Reviewer Agent",
+  "welcome_description": "A full-stack system for automated review analysis. Given a text and a target platform (Amazon, eBay, etc.), it produces three main outputs: an insightfulness score [0-100], a compliance check against platform guidelines, and a grammatical/stylistic analysis with inline text highlights. Results are saved in persistent chats on PostgreSQL.",
+  "how_it_works": [
+    "The flow is parallel: the review is processed simultaneously by two subsystems.",
+    "The InsightReviewScorer produces a numerical score.",
+    "The ReviewRAGSystem retrieves platform guidelines via keyword match (or, as a fallback, semantic embedding), then performs three steps via local LLM (Ollama): heuristic check, guideline compliance verification, and error detection with character indices for highlights. The two results are merged in the final response."
+  ],
+  "model_details": [
+    {"label": "Total Model", "value": "Insightfulness class that orchestrates two components"},
+    {"label": "InsightReviewScorer", "value": "Neural network based on DeBERTa-v3-large with three heads: score_head (0-100 regression), factuality_head (information density), and lexical_head (spaCy linguistic features). It uses AttentionPooling instead of just [CLS] to better handle long texts. Trained with a composite loss of 4 components (LLM distillation, factuality, category geometric bound, lexical features)."},
+    {"label": "ReviewRAGSystem", "value": "RAG system with LangChain + Ollama that loads guidelines from text files, retrieves them by keyword or embedding, and uses a structured LLM (Pydantic output) for the three checks."}
+  ],
+  "score_categories": [
+    {"label": "BAD", "description": "0-36 → Low score"},
+    {"label": "GOOD", "description": "37-70 → Medium score"},
+    {"label": "EXCELLENT", "description": "71-100 → High score"}
+  ],
+  "score_dimensions": [],
+  "metrics_description": "The model produces a continuous 0-100 value via the score_head. This score is then mapped into three categories: 0-36 → BAD, 37-70 → GOOD, 71-100 → EXCELLENT. The model learns to give high scores to reviews with high lexical density, specific nominal entities, argumentative structure, and absence of generic content — learning all this from raw text without runtime dependencies."
+}

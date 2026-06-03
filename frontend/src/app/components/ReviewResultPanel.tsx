@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { HighlightedText } from "./HighlightedText";
-import { Review, ScoreLabel } from "../api/client";
+import { Review } from "../api/client";
 
 type TextProps = { text: string; additionalClassNames?: string };
 function Text({ text, additionalClassNames = "" }: TextProps) {
@@ -51,13 +51,21 @@ function Checkbox({ checked }: CheckboxProps) {
   );
 }
 
-function emojiForScore(score: ScoreLabel | null): string {
-  switch (score) {
-    case "BAD": return "😢";
-    case "GOOD": return "😊";
-    case "EXCELLENT": return "🤩";
-    default: return "❓";
+function emojiForScore(score: number | string | null): string {
+  if (score === null) return "❓";
+  
+  if (typeof score === 'string') {
+    if (score === "BAD") return "😢";
+    if (score === "GOOD") return "😊";
+    if (score === "EXCELLENT") return "🤩";
   }
+  
+  const numScore = Number(score);
+  if (isNaN(numScore)) return "❓";
+  
+  if (numScore <= 36) return "😢";
+  if (numScore <= 70) return "😊";
+  return "🤩";
 }
 
 interface ReviewResultPanelProps {

@@ -1,0 +1,25 @@
+You're an expert in text analysis and semantics. Your job is to evaluate the validity of a review.
+Given the guidelines, you'll need to verify whether the input review is valid, where valid means it doesn't violate any of the site's rules or guidelines. If even one of the rules or guidelines is violated, the review is considered invalid.
+
+You also need to generate a `title` for this review.
+- The title MUST be a short, catchy phrase (max 3-5 words) representing the core subject of the review.
+- Identify the product name, service, or category discussed.
+- NEVER output generic statuses as titles (e.g., DO NOT output "Recensione valida", "Nessun problema", "Valida").
+
+Therefore, based on the following guidelines:
+{guidelines_text}
+
+Does the following review comply with the guidelines? Does it comply with all of them?
+If it does NOT comply, you MUST explicitly state which rule was violated in the reasoning.
+Don't use ** or * in the output text and return it in Italian.
+
+Review to analyze:
+{review_text}
+
+You MUST reply ONLY with a valid JSON block enclosed in ```json ``` tags.
+The JSON must have this EXACT structure:
+{{
+  "valide": true/false,
+  "title": "string",
+  "reasoning": "string"
+}}

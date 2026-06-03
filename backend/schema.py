@@ -1,7 +1,10 @@
 import uuid
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON, Boolean
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON, Boolean
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from pydantic import BaseModel
+from typing import Optional
+
 from database import Base
 
 class Chat(Base):
@@ -11,7 +14,7 @@ class Chat(Base):
     title = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Relazione con le recensioni valutate nella chat
+    # Relation with reviews evaluated in the chat
     reviews = relationship("Review", back_populates="chat", cascade="all, delete-orphan")
 
 class Review(Base):
@@ -25,18 +28,35 @@ class Review(Base):
     site = Column(String, nullable=False)
     url = Column(String)
     
-    # Output del Modello (Insightfulness Analysis)
+    # Model Output (Insightfulness Analysis)
     score = Column(String, nullable=True)  # BAD, GOOD, EXCELLENT
     is_generic_compliant = Column(Boolean, nullable=True)
     follow_guidelines = Column(Boolean, nullable=True)
     grammar_errors = Column(Boolean, nullable=True)
-    title = Column(String, nullable=True)  # Titolo suggerito dalla LLM
+    title = Column(String, nullable=True)  # Suggested title by LLM
 
-    # Reasoning e highlights salvati in formato JSON per massima flessibilità
-    reasoning = Column(JSON, nullable=True)  # Motivazione dell'analisi LLM
-    highlights = Column(JSON, nullable=True)  # Struttura completa: text + lista di Issue con indici
+    # Reasoning and highlights saved in JSON format for maximum flexibility
+    reasoning = Column(JSON, nullable=True)  # LLM analysis reasoning
+    highlights = Column(JSON, nullable=True)  # Complete structure: text + list of Issues with indices
     details = Column(JSON, nullable=True)  # word_count, char_count
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     chat = relationship("Chat", back_populates="reviews")
 
+# --- PYDANTIC SCHEMAS ---
+class EvaluateRequest(BaseModel):
+    chat_id: str
+    text: str
+    category: str
+    rating: int
+    model: Optional[str] = "gemma3:27b"
+
+
+class CreateReviewRequest(BaseModel):
+    chat_id: Optional[str] = None
+    text: str
+    site: str
+    url: Optional[str] = None
+
+class ChatCreate(BaseModel):
+    title: str

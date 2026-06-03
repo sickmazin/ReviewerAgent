@@ -7,7 +7,7 @@ di recensioni di prodotto.
 Architettura
 ------------
   Encoder (DeBERTa-v3-small, distilbert, o qualsiasi HF AutoModel)
-      │
+      |
       ├─ AttentionPooling        → rappresentazione globale pesata (migliore del solo CLS
       │                            per recensioni lunghe e strutturate)
       │
@@ -30,17 +30,12 @@ Inferenza
 """
 
 import os
-from statistics import mode
 from typing import Optional, Union
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoModel, AutoTokenizer
-try:
-    from rag import ReviewRAGSystem
-except:
-    from .rag import ReviewRAGSystem
 
 
 # ============================================================
@@ -84,7 +79,7 @@ class InsightReviewScorer(nn.Module):
 
     Parametri
     ----------
-    model_name      : nome HuggingFace del modello encoder (default: deberta-v3-small)
+    model_name      : nome HuggingFace del modello encoder (default: deberta-v3-large)
     n_lexical_feats : numero di feature lessicali/spaCy passate come segnale ausiliario
                       (default: 4 → noun_ratio, verb_ratio, adj_ratio, entity_density)
     dropout         : dropout applicato alle teste
@@ -97,10 +92,11 @@ class InsightReviewScorer(nn.Module):
 
     def __init__(
             self,
-            model_name: str = "microsoft/deberta-v3-small",
+            model_name: str = "microsoft/deberta-v3-large",
             n_lexical_feats: int = 4,
             dropout: float = 0.1,
             MODEL_PATH: str = None,
+            freeze_encoder: bool = False,
     ):
         super().__init__()
 
@@ -109,6 +105,11 @@ class InsightReviewScorer(nn.Module):
 
         # Forza encoder a FP32
         self.encoder = self.encoder.float()
+
+        if freeze_encoder:
+            print(f"[INFO] Congelamento pesi dell'encoder: {model_name}")
+            for param in self.encoder.parameters():
+                param.requires_grad = False
 
         # Pooling pesato — cattura meglio le recensioni lunghe
         self.pooling = AttentionPooling(H)
@@ -156,14 +157,15 @@ class InsightReviewScorer(nn.Module):
         elif MODEL_PATH is not None:
             print(f"[WARNING] {MODEL_PATH} non trovato. Uso pesi di default (non addestrato).")
         else:
-            print(f"[INFO] Inizializzazione Xavier.")
+            # Inizializzazione di default (Xavier) completata silenziosamente
+            pass
 
 
     # ------------------------------------------------------------------
     def _init_heads(self):
         """Inizializzazione Xavier per tutti i layer lineari delle teste."""
         for module in [self.score_head, self.factuality_head, self.lexical_head,
-            self.pooling]:
+                       self.pooling]:
             for layer in module.modules():
                 if isinstance(layer, nn.Linear):
                     nn.init.xavier_uniform_(layer.weight)
@@ -185,7 +187,8 @@ class InsightReviewScorer(nn.Module):
         target_dtype = self.score_head[0].weight.dtype
         pooled = pooled.to(target_dtype)
 
-        score        = torch.sigmoid(self.score_head(pooled)) * 100.0
+        # Output normalizzato in [0, 1] per stabilità loss
+        score        = torch.sigmoid(self.score_head(pooled))
         factuality   = torch.sigmoid(self.factuality_head(pooled))
         lexical_pred = torch.sigmoid(self.lexical_head(pooled))
 
@@ -220,6 +223,12 @@ class InsightReviewScorer(nn.Module):
         single = isinstance(text, str)
         texts  = [text] if single else text
 
+        # Application of prompt template to condition the encoder
+        prompt_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".prompts", "DeBERTa.txt"))
+        with open(prompt_path, "r") as f:
+            prompt_tmpl = f.read()
+        texts = [prompt_tmpl.format(t) for t in texts]
+
         self.eval()
         self.to(device)
 
@@ -233,9 +242,10 @@ class InsightReviewScorer(nn.Module):
         inputs = {k: v.to(device) for k, v in inputs.items()}
 
         with torch.no_grad():
-            scores, _, _, _ = self(**inputs)
+            scores, factuality, _, _ = self(**inputs)
 
-        results = scores.squeeze(-1).cpu().tolist()
+        # The model predicts in [0, 1], we map back to [0, 100] for the user
+        results = (scores.squeeze(-1) * 100.0).cpu().tolist()
 
         if single:
             return float(results) if isinstance(results, float) else float(results[0])
@@ -303,24 +313,31 @@ def compute_insight_loss(
     bound_valid   = (v_norm_sq.squeeze(-1) > 1e-4).float()             # (B,)
     emb_centered  = emb - emb_worst
     scalar_proj   = torch.sum(emb_centered * v_diff, dim=-1) / v_norm_sq.squeeze(-1)   # (B,)
-    expected_proj = target_score / 100.0                                                # (B,)
+    expected_proj = target_score  # target_score è già normalizzato in [0, 1]
     l_bound_raw   = F.mse_loss(scalar_proj, expected_proj, reduction="none")           # (B,)
     l_bound       = (l_bound_raw * bound_valid).mean()
 
     # ── 5. Margin Ranking Loss (opzionale) ───────────────────────────────
     if margin_w > 0.0:
         B = pred_score.shape[0]
-        # Costruiamo tutte le coppie (i, j) con target_i > target_j + margin
-        i_idx, j_idx = torch.triu_indices(B, B, offset=1)
+        # Costruiamo tutte le coppie (i, j) sul device corretto
+        i_idx, j_idx = torch.triu_indices(B, B, offset=1, device=pred_score.device)
         diff_target  = target_score[i_idx] - target_score[j_idx]       # (P,)
-        valid_pairs  = diff_target > margin                             # coppia significativa
+
+        # Una coppia è significativa se la differenza ASSOLUTA supera il margine
+        valid_pairs  = torch.abs(diff_target) > margin
 
         if valid_pairs.any():
-            si = pred_score[i_idx[valid_pairs.cpu()]]
-            sj = pred_score[j_idx[valid_pairs.cpu()]]
-            # Vogliamo si > sj → margin ranking con target=1
-            ones    = torch.ones_like(si)
-            l_rank  = F.margin_ranking_loss(si, sj, ones, margin=margin)
+            valid_i = i_idx[valid_pairs]
+            valid_j = j_idx[valid_pairs]
+
+            si = pred_score[valid_i]
+            sj = pred_score[valid_j]
+
+            # Target per ranking: 1 se target_i > target_j, altrimenti -1
+            target_y = torch.sign(diff_target[valid_pairs])
+
+            l_rank  = F.margin_ranking_loss(si, sj, target_y, margin=margin)
         else:
             l_rank = torch.tensor(0.0, device=pred_score.device)
     else:
@@ -354,49 +371,39 @@ def compute_insight_loss(
 # ============================================================
 
 if __name__ == "__main__":
-    MODEL_PATH = "../../.models/v3/best.pt"
-    MODEL_NAME = "microsoft/deberta-v3-small"
+    MODEL_PATH = "../.weights/v7_frozen/best.pt"
+    MODEL_NAME = "microsoft/deberta-v3-large"
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model     = InsightReviewScorer(MODEL_NAME,MODEL_PATH=MODEL_PATH)
 
 
-    rag = ReviewRAGSystem()
-
     review_alta = (
-        "Queste infradito Cressi Saint-Tropez sono state una bellissima scoperta, "
-        "rivelandosi un prodotto di ottima fattura che unisce l'affidabilità del marchio "
-        "a un design moderno e vivace. La prima cosa che colpisce è l'abbinamento cromatico, "
-        "in particolare la tonalità azzurrina: è un colore fresco, prettamente estivo e luminoso "
-        "che risalta tantissimo. Nonostante siano pensate per bambine e ragazze, la calzata è "
-        "generosa e versatile, risultando perfetta anche per un piede adulto che oscilla tra il "
-        "36 e il 37, garantendo un appoggio naturale e stabile. "
-        "Dal punto di vista tecnico, la qualità dei materiali è evidente. Il plantare in gomma è "
-        "compatto e sostiene bene il piede senza cedere sul tallone, mentre il cinturino a Y è "
-        "incastrato saldamente nella suola, trasmettendo una sensazione di robustezza superiore "
-        "rispetto ai modelli economici. Sono incredibilmente leggere e occupano pochissimo spazio "
-        "nella borsa, ma non sacrificano la sicurezza: la suola ruvida offre un ottimo grip "
-        "antiscivolo, fondamentale per muoversi senza timore su superfici bagnate. "
-        "Il comfort è assoluto anche dopo molte ore di utilizzo; il separatore tra le dita è "
-        "morbido e sottile, il che permette di usarle per lunghe passeggiate sulla spiaggia senza "
-        "il rischio di fastidiose vesciche. Essendo realizzate con materiali resistenti all'acqua, "
-        "si asciugano in un lampo e sono semplicissime da pulire. Anche se il prezzo può sembrare "
-        "leggermente più alto della media, la durata nel tempo e la cura dei dettagli giustificano "
-        "pienamente l'investimento."
+        "These Cressi Saint-Tropez flip-flops were a wonderful discovery, "
+        "revealing themselves to be a well-made product that combines the brand's reliability "
+        "with a modern and vibrant design. The first thing that strikes you is the color combination, "
+        "especially the light blue shade: it's a fresh, bright, summery color that really stands out. Although they're designed for girls and teenagers, the fit is "
+        "generous and versatile, making it perfect even for an adult foot ranging from "
+        "36 to 37, ensuring natural and stable support. "
+        "From a technical standpoint, the quality of the materials is evident. The rubber footbed is "
+        "compact and supports the foot well without giving way at the heel, while the Y-strap is "
+        "firmly embedded in the sole, giving a feeling of superior sturdiness "
+        "than cheaper models. They're incredibly light and take up very little space "
+        "in your bag, but they don't sacrifice safety: the sole The rough surface offers excellent non-slip grip, essential for moving fearlessly on wet surfaces. The comfort is absolute even after many hours of use; the toe separator is soft and thin, allowing you to use them for long walks on the beach without the risk of annoying blisters. Made from water-resistant materials, they dry in a flash and are very easy to clean. Although the price may seem slightly higher than average, the durability and attention to detail fully justify the investment."
     )
-    review_bassa = "Buon prodotto."
+    review_alta=(
+        "The headphones sound clear at medium volume, but the bass distorts above 80%. "
+        "Battery lasted about 18 hours over three days of commuting, and the ear pads "
+        "became warm after one hour."
+    )
+    review_bassa = "A"
 
-    result = rag.check(
-        platform="amazon",
-        review=review_alta,
-    )
-    print(result.report())
 
     score_high = model.inference_pipeline(review_alta, tokenizer)
-    #score_low  = model.inference_pipeline(review_bassa, tokenizer)
+    score_low  = model.inference_pipeline(review_bassa, tokenizer)
 
     print(f"\nModel: {'Fine-tuned' if os.path.exists(MODEL_PATH) else 'Default (non addestrato)'}")
     print(f"Insight Score (Alta qualità) : {score_high:.2f}/100")
-    #print(f"Insight Score (Bassa qualità): {score_low:.2f}/100")
+    print(f"Insight Score (Bassa qualità): {score_low:.2f}/100")
 
 

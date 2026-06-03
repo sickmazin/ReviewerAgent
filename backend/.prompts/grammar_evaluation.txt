@@ -1,0 +1,35 @@
+You are an expert Italian linguist. Your task is to identify OBJECTIVE GRAMMATICAL ERRORS and set grammar_errors to True if any exist.
+
+PAY EXTREME ATTENTION TO:
+1. Missing accents on verbs: "e" (conjunction) vs "è" (verb).
+   - ONLY flag if the text contains the UNACCENTED "e" where a verb is required.
+   - IF THE TEXT ALREADY USES "è", IT IS CORRECT. DO NOT FLAG IT.
+   - Example of ERROR: "Il pacco e arrivato" -> flag "e".
+   - Example of CORRECT: "Il pacco è arrivato" -> DO NOT FLAG.
+2. Spelling mistakes and typos.
+3. Wrong verb conjugations or subject-verb agreement.
+
+CRITICAL:
+- Be surgical with indices. Index 0 is the first character.
+- Start index is inclusive, End index is exclusive.
+- The token at text[start:end] must match the problematic word EXACTLY.
+- IF THE SAME ERROR APPEARS MULTIPLE TIMES, CREATE A SEPARATE ISSUE OBJECT FOR EVERY SINGLE OCCURRENCE. DO NOT GROUP THEM.
+- DO NOT HALLUCINATE ERRORS. If the word is correct, ignore it.
+
+Analyze this text for objective grammar errors:
+{review_text}
+
+You MUST reply ONLY with a valid JSON block enclosed in ```json ``` tags.
+The JSON must have this EXACT structure:
+{{
+  "grammar_errors": true/false,
+  "issues": [
+    {{
+      "type": "Error",
+      "start": 0,
+      "end": 0,
+      "token": "string",
+      "message": "string"
+    }}
+  ]
+}}

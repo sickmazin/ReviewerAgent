@@ -115,7 +115,21 @@ export default function ReviewInput() {
                     <p className="leading-[normal]">Insightfulness Score</p>
                   </div>
                   <div className="flex flex-[1_0_0] flex-col justify-center min-h-px min-w-px relative text-[100px] w-full" style={{ fontVariationSettings: "'GRAD' 0, 'wdth' 100" }}>
-                    <p className="leading-[normal]">{result ? result.score : "--"}/100 {result?.score === "EXCELLENT" ? "🔥" : result?.score === "GOOD" ? "😉" : result?.score === "BAD" ? "👎" : ""}</p>
+                    <p className="leading-[normal]">
+                      {result ? (
+                        (() => {
+                          if (result.score === null) return "--/100";
+                          const num = Number(result.score);
+                          if (isNaN(num)) return `${result.score}/100 ❓`;
+                          let emoji = "🤩";
+                          if (num <= 36) emoji = "😢";
+                          else if (num <= 70) emoji = "😊";
+                          return `${num}/100 ${emoji}`;
+                        })()
+                      ) : (
+                        "--/100"
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>

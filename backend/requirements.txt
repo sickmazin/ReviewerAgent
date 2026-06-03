@@ -11,3 +11,14 @@ sentence-transformers
 tiktoken
 sentencepiece
 protobuf
+python-dotenv
+google-genai
+matplotlib
+numpy
+pandas
+scipy
+seaborn
+scikit-learn
+spacy
+tqdm
+datasets

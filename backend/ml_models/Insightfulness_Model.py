@@ -1,8 +1,9 @@
 from typing import Optional
 import torch
 from transformers import AutoTokenizer
-from .rag import ReviewRAGSystem
-from .insight_nn_v2 import InsightReviewScorer
+
+from backend.ml_models.rag_and_compliance.rag_system import ReviewRAGSystem
+from .insightfulness_nn import InsightReviewScorer
 
 class Insightfulness():
     """
@@ -14,7 +15,7 @@ class Insightfulness():
     def __init__(
             self,
             model_path: Optional[str] = None,
-            model_name: str = "microsoft/deberta-v3-small",
+            model_name: str = "microsoft/deberta-v3-large",
             tokenizer: AutoTokenizer = None,
             llm_model_name: str = "gemma3:27b"
     ):
@@ -30,30 +31,25 @@ class Insightfulness():
 
 
 
-    def score(self, text: str) -> Optional[str]:
-        score = self.scorer.inference_pipeline(text, self._tokenizer)
-        print(f"[INFO] Insightfulness score: {score}")
-        match score:
-            case _ if 0 < score <= 36:
-                return "BAD"
-            case _ if 36 < score <= 70:
-                return "GOOD"
-            case _ if score>70:
-                return "EXCELLENT"
-            case _:
-                return "ERROR"
+    def score(self, text: str) -> Optional[int]:
+        score_val = self.scorer.inference_pipeline(text, self._tokenizer)
+        print(f"[INFO] Insightfulness score: {score_val}")
+        try:
+            return int(round(score_val))
+        except (ValueError, TypeError):
+            return None
 
 
     def execute_output(self, review, category, llm_model_name="gemma3:27b"):
         if self.checker.checker.model_name != llm_model_name:
             print(f"[INFO] Switching LLM model from {self.checker.checker.model_name} to {llm_model_name}")
-            self.checker = ReviewRAGSystem(llm_model_name=llm_model_name)
+            self.checker.update_llm_model(llm_model_name)
 
         check_result = self.checker.check(
             platform=category,
             review=review,
         )
-        # Calcolo dello score di insightfulness
+        # Calculation of the insightfulness score
         insightful_score = self.score(review)
 
         return {
@@ -70,74 +66,75 @@ class Insightfulness():
 
 
 # ============================================================
-#  Main di test
+#  Test Main
 # ============================================================
 
 if __name__ == "__main__":
+    import os
     print("=" * 72)
     print("  Insightfulness Model — Test")
     print("=" * 72)
-    MODEL_PATH = "../.models/v3/best.pt"
+    MODEL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".weights", "v7_frozen", "best.pt"))
 
-    # Istanzia il modello
+    # Instantiate the model
     model = Insightfulness(model_path=MODEL_PATH)
 
-    # Test 1: Recensione Amazon buona
-    print("\n[TEST 1] Recensione Amazon — buona qualità\n")
+    # Test 1: Good Amazon review
+    print("\n[TEST 1] Amazon review — good quality\n")
     review1 = (
-        "Queste cuffie sono davvero eccellenti. Il suono è cristallino, "
-        "i bassi profondi ma non invadenti. La costruzione in alluminio "
-        "trasmette robustezza. La batteria dura facilmente 25 ore. "
-        "Consiglio vivamente a chi cerca qualità audio senza spendere una fortuna."
+        "These headphones are truly excellent. The sound is crystal clear, "
+        "the bass is deep but not intrusive. The aluminum construction "
+        "conveys robustness. The battery easily lasts 25 hours. "
+        "Highly recommend to anyone looking for audio quality without spending a fortune."
     )
 
     result1 = model.execute_output(review1, "amazon")
-    print(f"Score Insightfulness: {result1['score']}")
-    print(f"Conforme euristicamente: {result1['is_generic_compliant']}")
-    print(f"Conforme alle linee guida (LLM): {result1['follow_guidelines']}")
-    print(f"Errori grammaticali: {result1['grammar_errors']}")
-    print(f"Titolo suggerito: '{result1['title']}'")
+    print(f"Insightfulness Score: {result1['score']}")
+    print(f"Heuristically Compliant: {result1['is_generic_compliant']}")
+    print(f"Guidelines Compliant (LLM): {result1['follow_guidelines']}")
+    print(f"Grammar Errors: {result1['grammar_errors']}")
+    print(f"Suggested Title: '{result1['title']}'")
     if result1['highlights']:
-        print(f"Highlights trovati: {len(result1['highlights']['issues'])} problemi")
+        print(f"Highlights found: {len(result1['highlights']['issues'])} issues")
         violations = [i for i in result1['highlights']['issues'] if i['type'] == 'Violazione']
         if violations:
-            print(f"Violazioni: {len(violations)}")
-        for issue in result1['highlights']['issues'][:3]:  # Mostra i primi 3
+            print(f"Violations: {len(violations)}")
+        for issue in result1['highlights']['issues'][:3]:  # Show first 3
             print(f"  - [{issue['type']}]: '{issue['token']}' (pos {issue['start']}-{issue['end']})")
 
-    # Test 2: Recensione con errori
-    print("\n\n[TEST 2] Recensione con errori grammaticali\n")
+    # Test 2: Review with errors
+    print("\n\n[TEST 2] Review with grammar errors\n")
     review2 = (
-        "PRODOTTO OTTIMO!!! La qualita e buona, pero la spedizione "
-        "duro troppe giorni. Comunque lo raccomando altamenti consigliato."
+        "EXCELLENT PRODUCT!!! The quality is good, but the shipping "
+        "lasted too many days. However, I highly recommend it highly recommended."
     )
 
     result2 = model.execute_output(review2, "amazon")
-    print(f"Score Insightfulness: {result2['score']}")
-    print(f"Conforme euristicamente: {result2['is_generic_compliant']}")
-    print(f"Conforme alle linee guida (LLM): {result2['follow_guidelines']}")
-    print(f"Errori grammaticali: {result2['grammar_errors']}")
+    print(f"Insightfulness Score: {result2['score']}")
+    print(f"Heuristically Compliant: {result2['is_generic_compliant']}")
+    print(f"Guidelines Compliant (LLM): {result2['follow_guidelines']}")
+    print(f"Grammar Errors: {result2['grammar_errors']}")
     if result2['highlights']:
-        print(f"Highlights trovati: {len(result2['highlights']['issues'])} problemi")
+        print(f"Highlights found: {len(result2['highlights']['issues'])} issues")
         violations = [i for i in result2['highlights']['issues'] if i['type'] == 'Violazione']
         if violations:
-            print(f"Violazioni rilevate: {len(violations)}")
+            print(f"Violations detected: {len(violations)}")
         for issue in result2['highlights']['issues'][:5]:
             print(f"  - [{issue['type']}]: '{issue['token']}'")
 
-    # Test 3: Recensione breve
-    print("\n\n[TEST 3] Recensione breve\n")
-    review3 = "Prodotto buono, arrivato veloce."
+    # Test 3: Short review
+    print("\n\n[TEST 3] Short review\n")
+    review3 = "Good product, arrived fast."
 
     result3 = model.execute_output(review3, "ebay")
-    print(f"Score Insightfulness: {result3['score']}")
-    print(f"Conforme euristicamente: {result3['is_generic_compliant']}")
+    print(f"Insightfulness Score: {result3['score']}")
+    print(f"Heuristically Compliant: {result3['is_generic_compliant']}")
     if result3['highlights']:
-        print(f"Highlights trovati: {len(result3['highlights']['issues'])} problemi")
+        print(f"Highlights found: {len(result3['highlights']['issues'])} issues")
         warnings = [i for i in result3['highlights']['issues'] if i['type'] == 'Avvertimento']
         if warnings:
-            print(f"Avvertimenti: {len(warnings)}")
+            print(f"Warnings: {len(warnings)}")
 
     print("\n" + "=" * 72)
-    print("  Test completato!")
+    print("  Test complete!")
     print("=" * 72)

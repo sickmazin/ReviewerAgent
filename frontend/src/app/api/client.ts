@@ -32,7 +32,7 @@ export interface Review {
   text: string;
   site: string;
   url: string | null;
-  score: ScoreLabel | null;
+  score: number | string | null;
   is_generic_compliant: boolean | null;
   follow_guidelines: boolean | null;
   grammar_errors: boolean | null;

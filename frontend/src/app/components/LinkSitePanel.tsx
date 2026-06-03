@@ -112,9 +112,9 @@ export default function LinkSitePanel({
           <Checkbox checked={selectedModel === "gemma3:27b"} onChange={() => onModelChange("gemma3:27b")} />
           <span className="text-white text-[24px] font-['Roboto_Serif:Medium',sans-serif]">Gemma 3 (27b)</span>
         </div>
-        <div className="flex items-center gap-[10px] cursor-pointer" onClick={() => onModelChange("gemma4:26b")}>
-          <Checkbox checked={selectedModel === "gemma4:26b"} onChange={() => onModelChange("gemma4:26b")} />
-          <span className="text-white text-[24px] font-['Roboto_Serif:Medium',sans-serif]">Gemma 4 (26b)</span>
+        <div className="flex items-center gap-[10px] cursor-pointer" onClick={() => onModelChange("gemma4:31b-cloud")}>
+          <Checkbox checked={selectedModel === "gemma4:31b-cloud"} onChange={() => onModelChange("gemma4:31b-cloud")} />
+          <span className="text-white text-[24px] font-['Roboto_Serif:Medium',sans-serif]">Gemma 4 Cloud (31b)</span>
         </div>
       </div>
 
