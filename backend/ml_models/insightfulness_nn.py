@@ -1,32 +1,27 @@
 """
-insight_model.py
-================
-InsightReviewScorer — modello unificato per lo scoring di insightfulness
-di recensioni di prodotto.
-
-Architettura
+Architecture
 ------------
-  Encoder (DeBERTa-v3-small, distilbert, o qualsiasi HF AutoModel)
+  Encoder (DeBERTa-v3-large)
       |
-      ├─ AttentionPooling        → rappresentazione globale pesata (migliore del solo CLS
-      │                            per recensioni lunghe e strutturate)
+      ├─ AttentionPooling        → weighted global representation (better than [CLS] alone
+      │                            for long and structured reviews)
       │
-      ├─ score_head              → regressione 0-100 (distillazione LLM teacher)   [alpha]
-      ├─ factuality_head         → densità informativa/fattualità offline           [beta]
-      └─ lexical_head            → features spaCy fuse nello spazio latente         [delta]
+      ├─ score_head              → 0-100 regression (LLM teacher distillation)   [alpha]
+      ├─ factuality_head         → offline information density/factuality           [beta]
+      └─ lexical_head            → spaCy features fused into the latent space         [delta]
 
-Loss composita
+Composite Loss
 --------------
   L = alpha * L_distill   (MSE score vs LLM teacher)
-    + beta  * L_factuality (MSE fattualità predetta vs segnale offline)
-    + gamma * L_bound      (allineamento geometrico worst→best per categoria)
-    + delta * L_rank       (margin ranking: review_A > review_B se score_A > score_B)
+    + beta  * L_factuality (MSE predicted factuality vs offline signal)
+    + gamma * L_bound      (geometric alignment worst→best per category)
+    + delta * L_rank       (margin ranking: review_A > review_B if score_A > score_B)
 
-Inferenza
+Inference
 ---------
-  Nessuna dipendenza da spaCy o da dati di categoria a runtime:
-  l'encoder impara tutto ciò che serve dal testo grezzo.
-  Le feature spaCy vengono usate solo come segnale di supervisione durante il training.
+  No dependency on spaCy or category data at runtime:
+  the encoder learns everything it needs from the raw text.
+  spaCy features are used only as supervision signals during training.
 """
 
 import os
@@ -44,9 +39,9 @@ from transformers import AutoModel, AutoTokenizer
 
 class AttentionPooling(nn.Module):
     """
-    Pooling pesato sull'intera sequenza di token tramite un attention scorer.
-    Restituisce una rappresentazione (B, H) che cattura meglio le recensioni
-    lunghe rispetto al solo token [CLS].
+    Weighted pooling over the entire token sequence via an attention scorer.
+    Returns a (B, H) representation that better captures long reviews
+    compared to the [CLS] token alone.
     """
 
     def __init__(self, hidden_size: int):
@@ -58,10 +53,10 @@ class AttentionPooling(nn.Module):
             hidden_states: torch.Tensor,        # (B, T, H)
             attention_mask: torch.Tensor,       # (B, T)
     ) -> torch.Tensor:                      # (B, H)
-        # Score di attenzione per ogni token
+        # Attention score for each token
         scores = self.attn(hidden_states).squeeze(-1)           # (B, T)
 
-        # Maschera padding con -inf prima della softmax
+        # Mask padding with -inf before softmax
         scores = scores.masked_fill(attention_mask == 0, float("-inf"))
         weights = torch.softmax(scores, dim=-1).unsqueeze(-1)   # (B, T, 1)
 
@@ -70,19 +65,19 @@ class AttentionPooling(nn.Module):
 
 
 # ============================================================
-#  Modello principale
+#  Main Model
 # ============================================================
 
 class InsightReviewScorer(nn.Module):
     """
-    Scorer end-to-end per l'insightfulness di recensioni.
+    End-to-end scorer for review insightfulness.
 
-    Parametri
+    Parameters
     ----------
-    model_name      : nome HuggingFace del modello encoder (default: deberta-v3-large)
-    n_lexical_feats : numero di feature lessicali/spaCy passate come segnale ausiliario
+    model_name      : HuggingFace encoder model name (default: deberta-v3-large)
+    n_lexical_feats : number of lexical/spaCy features passed as auxiliary signal
                       (default: 4 → noun_ratio, verb_ratio, adj_ratio, entity_density)
-    dropout         : dropout applicato alle teste
+    dropout         : dropout applied to the heads
 
     Forward
     -------
@@ -103,19 +98,19 @@ class InsightReviewScorer(nn.Module):
         self.encoder = AutoModel.from_pretrained(model_name)
         H = self.encoder.config.hidden_size
 
-        # Forza encoder a FP32
+        # Force encoder to FP32
         self.encoder = self.encoder.float()
 
         if freeze_encoder:
-            print(f"[INFO] Congelamento pesi dell'encoder: {model_name}")
+            print(f"[INFO] Freezing encoder weights: {model_name}")
             for param in self.encoder.parameters():
                 param.requires_grad = False
 
-        # Pooling pesato — cattura meglio le recensioni lunghe
+        # Weighted pooling — captures long reviews better
         self.pooling = AttentionPooling(H)
 
-        # ── Score head (testa principale) ──────────────────────────────────
-        # Regressione 0-100 per distillare il ragionamento dell'LLM teacher.
+        # ── Score head (main head) ──────────────────────────────────
+        # 0-100 regression to distill LLM teacher reasoning.
         self.score_head = nn.Sequential(
             nn.Linear(H, H // 2),
             nn.GELU(),
@@ -126,8 +121,8 @@ class InsightReviewScorer(nn.Module):
             nn.Linear(H // 4, 1),
         )
 
-        # ── Factuality head (testa ausiliaria 1) ───────────────────────────
-        # Predice la densità informativa/fattualità (segnale offline, 0-1).
+        # ── Factuality head (auxiliary head 1) ────
+        # Predicts information density/factuality (offline signal, 0-1).
         self.factuality_head = nn.Sequential(
             nn.Linear(H, H // 4),
             nn.GELU(),
@@ -135,10 +130,10 @@ class InsightReviewScorer(nn.Module):
             nn.Linear(H // 4, 1),
         )
 
-        # ── Lexical head (testa ausiliaria 2) ──────────────────────────────
-        # Predice n feature lessicali calcolate offline con spaCy.
-        # Forza l'encoder ad essere sensibile alle proprietà linguistiche
-        # senza richiederle a runtime durante l'inferenza.
+        # ── Lexical head (auxiliary head 2) ─────
+        # Predicts n lexical features calculated offline with spaCy.
+        # Forces the encoder to be sensitive to linguistic properties
+        # without requiring them at runtime during inference.
         self.lexical_head = nn.Sequential(
             nn.Linear(H, H // 4),
             nn.GELU(),
@@ -149,21 +144,21 @@ class InsightReviewScorer(nn.Module):
         self._init_heads()
 
         if MODEL_PATH is not None and os.path.exists(MODEL_PATH):
-            print(f"[INFO] Caricamento modello fine-tuned da {MODEL_PATH}...")
+            print(f"[INFO] Loading fine-tuned model from {MODEL_PATH}...")
             device = "cuda" if torch.cuda.is_available() else "cpu"
             state_dict = torch.load(MODEL_PATH, map_location=device, weights_only=True)
             self.load_state_dict(state_dict)
-            print(f"[INFO] Modello caricato da {MODEL_PATH}.")
+            print(f"[INFO] Model loaded from {MODEL_PATH}.")
         elif MODEL_PATH is not None:
-            print(f"[WARNING] {MODEL_PATH} non trovato. Uso pesi di default (non addestrato).")
+            print(f"[WARNING] {MODEL_PATH} not found. Using default weights (untrained).")
         else:
-            # Inizializzazione di default (Xavier) completata silenziosamente
+            # Default initialization (Xavier) completed silently
             pass
 
 
     # ------------------------------------------------------------------
     def _init_heads(self):
-        """Inizializzazione Xavier per tutti i layer lineari delle teste."""
+        """Xavier initialization for all linear layers of the heads."""
         for module in [self.score_head, self.factuality_head, self.lexical_head,
                        self.pooling]:
             for layer in module.modules():
@@ -180,14 +175,14 @@ class InsightReviewScorer(nn.Module):
     ):
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
 
-        # Attention pooling sull'intera sequenza
+        # Attention pooling over the entire sequence
         pooled = self.pooling(outputs.last_hidden_state, attention_mask)
 
-        # Cast per gestire dtypes misti (encoder Half, teste Float)
+        # Cast to handle mixed dtypes (Half encoder, Float heads)
         target_dtype = self.score_head[0].weight.dtype
         pooled = pooled.to(target_dtype)
 
-        # Output normalizzato in [0, 1] per stabilità loss
+        # Output normalized in [0, 1] for loss stability
         score        = torch.sigmoid(self.score_head(pooled))
         factuality   = torch.sigmoid(self.factuality_head(pooled))
         lexical_pred = torch.sigmoid(self.lexical_head(pooled))
@@ -196,7 +191,7 @@ class InsightReviewScorer(nn.Module):
 
 
     # ============================================================
-    #  Inferenza
+    #  Inference
     # ============================================================
     def inference_pipeline(
             self,
@@ -205,18 +200,18 @@ class InsightReviewScorer(nn.Module):
             device: Optional[str] = None,
     ) -> Union[float, list]:
         """
-        Valuta una o più recensioni restituendo lo score di insightfulness [0-100].
+        Evaluates one or more reviews returning the insightfulness score [0-100].
 
-        Parametri
+        Parameters
         ----------
-        text     : stringa singola o lista di stringhe
-        model    : InsightReviewScorer (fine-tuned o default)
-        tokenizer: tokenizer HuggingFace compatibile col modello
-        device   : 'cuda', 'cpu', o None per auto-detect
+        text     : single string or list of strings
+        model    : InsightReviewScorer (fine-tuned or default)
+        tokenizer: HuggingFace tokenizer compatible with the model
+        device   : 'cuda', 'cpu', or None for auto-detect
 
-        Ritorna
+        Returns
         -------
-        float (singola stringa) oppure list[float] (lista di stringhe)
+        float (single string) or list[float] (list of strings)
         """
         device    = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -253,45 +248,45 @@ class InsightReviewScorer(nn.Module):
 
 
 # ============================================================
-#  Loss composita
+#  Composite Loss
 # ============================================================
 
 def compute_insight_loss(
-        pred_score:        torch.Tensor,           # (B,) o (B,1) — score predetto
-        target_score:      torch.Tensor,           # (B,)          — score LLM teacher
-        pred_factuality:   torch.Tensor,           # (B,) o (B,1) — fattualità predetta
-        target_factuality: torch.Tensor,           # (B,)          — fattualità offline
-        pred_lexical:      torch.Tensor,           # (B, F)        — feature lessicali predette
-        target_lexical:    torch.Tensor,           # (B, F)        — feature lessicali offline
-        emb:               torch.Tensor,           # (B, H)        — embedding pooled
-        emb_worst:         torch.Tensor,           # (B, H)        — bound inferiore categoria
-        emb_best:          torch.Tensor,           # (B, H)        — bound superiore categoria
-        alpha:  float = 0.50,   # peso L_distill
-        beta:   float = 0.15,   # peso L_factuality
-        gamma:  float = 0.20,   # peso L_bound
-        delta:  float = 0.15,   # peso L_lexical
-        margin_w: float = 0.0,  # peso L_rank (0 = disabilitato se batch non ha coppie)
-        margin:   float = 5.0,  # margine minimo tra score di coppie diverse
+        pred_score:        torch.Tensor,           # (B,) or (B,1) — predicted score
+        target_score:      torch.Tensor,           # (B,)          — LLM teacher score
+        pred_factuality:   torch.Tensor,           # (B,) or (B,1) — predicted factuality
+        target_factuality: torch.Tensor,           # (B,)          — offline factuality
+        pred_lexical:      torch.Tensor,           # (B, F)        — predicted lexical features
+        target_lexical:    torch.Tensor,           # (B, F)        — offline lexical features
+        emb:               torch.Tensor,           # (B, H)        — pooled embedding
+        emb_worst:         torch.Tensor,           # (B, H)        — category lower bound
+        emb_best:          torch.Tensor,           # (B, H)        — category upper bound
+        alpha:  float = 0.50,   # L_distill weight
+        beta:   float = 0.15,   # L_factuality weight
+        gamma:  float = 0.20,   # L_bound weight
+        delta:  float = 0.15,   # L_lexical weight
+        margin_w: float = 0.0,  # L_rank weight (0 = disabled if batch has no pairs)
+        margin:   float = 5.0,  # minimum margin between scores of different pairs
 ) -> tuple[torch.Tensor, dict]:
     """
-    Loss composita a quattro componenti + ranking loss opzionale.
+    Four-component composite loss + optional ranking loss.
 
-    Componenti
+    Components
     ----------
-    L_distill   (alpha)  : MSE tra score predetto e score LLM teacher (range 0-100).
-    L_factuality (beta)  : MSE tra fattualità predetta e segnale offline (range 0-1).
-    L_lexical   (delta)  : MSE tra feature lessicali predette e quelle spaCy offline.
-                           Forza l'encoder ad essere sensibile alle proprietà linguistiche
-                           senza richiedere spaCy a runtime.
-    L_bound     (gamma)  : Geometric Bound Loss — la proiezione dell'embedding sull'asse
-                           (worst → best) di categoria deve rispecchiare lo score.
-    L_rank      (margin_w): Margin Ranking Loss — per ogni coppia (i,j) nello stesso batch
-                           con target_score_i > target_score_j + margin, il modello deve
-                           predire score_i > score_j.
+    L_distill   (alpha)  : MSE between predicted score and LLM teacher score (range 0-100).
+    L_factuality (beta)  : MSE between predicted factuality and offline signal (range 0-1).
+    L_lexical   (delta)  : MSE between predicted lexical features and offline spaCy ones.
+                           Forces the encoder to be sensitive to linguistic properties
+                           without requiring spaCy at runtime.
+    L_bound     (gamma)  : Geometric Bound Loss — the projection of the embedding onto the
+                           (worst → best) category axis must reflect the score.
+    L_rank      (margin_w): Margin Ranking Loss — for each pair (i,j) in the same batch
+                           with target_score_i > target_score_j + margin, the model must
+                           predict score_i > score_j.
 
-    Ritorna
+    Returns
     -------
-    (total_loss, dict con le singole componenti per il logging)
+    (total_loss, dict with individual components for logging)
     """
     pred_score      = pred_score.squeeze()
     pred_factuality = pred_factuality.squeeze()
@@ -309,22 +304,22 @@ def compute_insight_loss(
     v_diff    = emb_best - emb_worst                                    # (B, H)
     v_norm_sq = torch.sum(v_diff ** 2, dim=-1, keepdim=True) + 1e-8    # (B, 1)
 
-    # Maschera sample con bound degeneri (worst ≈ best → categoria con 1 solo campione)
+    # Mask samples with degenerate bounds (worst ≈ best → category with only 1 sample)
     bound_valid   = (v_norm_sq.squeeze(-1) > 1e-4).float()             # (B,)
     emb_centered  = emb - emb_worst
     scalar_proj   = torch.sum(emb_centered * v_diff, dim=-1) / v_norm_sq.squeeze(-1)   # (B,)
-    expected_proj = target_score  # target_score è già normalizzato in [0, 1]
+    expected_proj = target_score  # target_score is already normalized in [0, 1]
     l_bound_raw   = F.mse_loss(scalar_proj, expected_proj, reduction="none")           # (B,)
     l_bound       = (l_bound_raw * bound_valid).mean()
 
-    # ── 5. Margin Ranking Loss (opzionale) ───────────────────────────────
+    # ── 5. Margin Ranking Loss (optional) ───────────────────────────────
     if margin_w > 0.0:
         B = pred_score.shape[0]
-        # Costruiamo tutte le coppie (i, j) sul device corretto
+        # Build all pairs (i, j) on the correct device
         i_idx, j_idx = torch.triu_indices(B, B, offset=1, device=pred_score.device)
         diff_target  = target_score[i_idx] - target_score[j_idx]       # (P,)
 
-        # Una coppia è significativa se la differenza ASSOLUTA supera il margine
+        # A pair is significant if the ABSOLUTE difference exceeds the margin
         valid_pairs  = torch.abs(diff_target) > margin
 
         if valid_pairs.any():
@@ -334,7 +329,7 @@ def compute_insight_loss(
             si = pred_score[valid_i]
             sj = pred_score[valid_j]
 
-            # Target per ranking: 1 se target_i > target_j, altrimenti -1
+            # Target for ranking: 1 if target_i > target_j, otherwise -1
             target_y = torch.sign(diff_target[valid_pairs])
 
             l_rank  = F.margin_ranking_loss(si, sj, target_y, margin=margin)
@@ -343,7 +338,7 @@ def compute_insight_loss(
     else:
         l_rank = torch.tensor(0.0, device=pred_score.device)
 
-    # ── Totale pesato ────────────────────────────────────────────────────
+    # ── Weighted Total ────────────────────────────────────────────────────
     total = (
             alpha    * l_distill    +
             beta     * l_factuality +
@@ -402,8 +397,6 @@ if __name__ == "__main__":
     score_high = model.inference_pipeline(review_alta, tokenizer)
     score_low  = model.inference_pipeline(review_bassa, tokenizer)
 
-    print(f"\nModel: {'Fine-tuned' if os.path.exists(MODEL_PATH) else 'Default (non addestrato)'}")
-    print(f"Insight Score (Alta qualità) : {score_high:.2f}/100")
-    print(f"Insight Score (Bassa qualità): {score_low:.2f}/100")
-
-
+    print(f"\nModel: {'Fine-tuned' if os.path.exists(MODEL_PATH) else 'Default (untrained)'}")
+    print(f"Insight Score (High quality) : {score_high:.2f}/100")
+    print(f"Insight Score (Low quality): {score_low:.2f}/100")

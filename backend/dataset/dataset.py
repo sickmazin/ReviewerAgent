@@ -15,19 +15,15 @@ from backend.ml_models.insightfulness_nn import InsightReviewScorer
 
 def _load_spacy() -> spacy.language.Language:
     """
-    Loads it_core_news_sm (Italian) with fallback to en_core_web_sm.
+    Load en_core_web_sm and it_core_news_sm (Italian) is for fallback.
     Parser and NER are disabled for speed (using only the POS tagger).
     """
     for name in ["en_core_web_sm", "it_core_news_sm"]:
         try:
             return spacy.load(name, disable=["ner", "parser"])
         except OSError:
-            os.system(f"python -m spacy download {name}")
-            try:
-                return spacy.load(name, disable=["ner", "parser"])
-            except OSError:
-                continue
-    raise RuntimeError("No spaCy model found. Install with: python -m spacy download it_core_news_sm")
+            continue
+    raise RuntimeError("No spaCy model found. Install with: python -m spacy download en_core_web_sm or it_core_news_sm")
 
 
 nlp = _load_spacy()

@@ -197,8 +197,6 @@ class ComplianceChecker:
             # we return an empty response to avoid crashing the whole pipeline.
             return TextAnalysisResponse(text=review, issues=[], grammar_errors=False)
 
-
-
         result.issues = self._get_filtered_issues(result, review)
         # Recalculate grammar_errors in case we removed all alleged errors
         result.grammar_errors = any(i.type in ["Error", "Violation"] for i in result.issues)
