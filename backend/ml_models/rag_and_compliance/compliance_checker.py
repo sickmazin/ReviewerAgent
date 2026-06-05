@@ -275,23 +275,25 @@ class ComplianceChecker:
         has_violations = any(issue.type == "Violation" for issue in generic_issues)
         is_generic_compliant = not has_violations
 
-        # Phase 2 — LLM check for guidelines compliance
-        follow_guidelines, reasoning, title= None, None, None
-        try:
-            follow_guidelines, reasoning, title = self.check_guidelines_by_model(review,guideline)
-        except Exception as e:
-            reasoning = f"[LLM not available: {e}]"
-
-        # Phase 3 — error/suggestion analysis with LLM
+        # Phase 2 — error/suggestion analysis with LLM
         highlights_issues = []
         grammar_errors = None
-
         try:
             highlights_response = self.check_what_to_highlights(review)
             highlights_issues = highlights_response.issues
             grammar_errors = highlights_response.grammar_errors
         except Exception as e:
             print(f"[ComplianceChecker] Error in check_what_to_highlights: {e}")
+
+        
+        # Phase 3 — LLM check for guidelines compliance
+        follow_guidelines, reasoning, title= None, None, None
+        try:
+            follow_guidelines, reasoning, title = self.check_guidelines_by_model(review,guideline)
+        except Exception as e:
+            reasoning = f"[LLM not available: {e}]"
+
+
 
         # Combine all Issues into a single TextAnalysisResponse
         all_issues = generic_issues + highlights_issues

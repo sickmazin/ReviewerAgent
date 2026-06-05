@@ -6,6 +6,10 @@ INPUT_AMAZON = "datasets/amazon_reviews_5M_random.csv"
 INPUT_RESTAURANT = "datasets/Restaurant reviews.csv"
 INPUT_BNB = "datasets/airbnb_reviews.csv"
 OUTPUT_CSV = "datasets/reviews_labeled.csv"
+INPUT_AMAZON = "../.datasets/amazon_reviews_5M_random.csv"
+INPUT_RESTAURANT = "../.datasets/Restaurant reviews.csv"
+INPUT_BNB = "../.datasets/airbnb_reviews.csv"
+OUTPUT_CSV = "../.datasets/reviews_labeled.csv"
 SAMPLE_SIZE = 500000
 
 # --- AMAZON DATASET CONFIGURATION ---
