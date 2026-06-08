@@ -1,11 +1,7 @@
 # --- TEACHER CONFIGURATION ---
 import os
 
-MODEL_NAME = "gemma3:27b"
-INPUT_AMAZON = "datasets/amazon_reviews_5M_random.csv"
-INPUT_RESTAURANT = "datasets/Restaurant reviews.csv"
-INPUT_BNB = "datasets/airbnb_reviews.csv"
-OUTPUT_CSV = "datasets/reviews_labeled.csv"
+MODEL_NAME = "gemma3:12b"
 INPUT_AMAZON = "../.datasets/amazon_reviews_5M_random.csv"
 INPUT_RESTAURANT = "../.datasets/Restaurant reviews.csv"
 INPUT_BNB = "../.datasets/airbnb_reviews.csv"

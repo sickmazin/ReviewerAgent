@@ -20,7 +20,7 @@ def get_gemini_score(text: str, max_retries: int = 2) -> Optional[float]:
         return None
 
     # Carica il prompt dal file dedicato
-    prompt_file_path = os.path.join(os.path.dirname(__file__), "../", ".prompts", "gemini.txt")
+    prompt_file_path = os.path.join(os.path.dirname(__file__), "../", ".prompts", "benchmark.txt")
     try:
         with open(prompt_file_path, "r", encoding="utf-8") as f:
             prompt_template = f.read()

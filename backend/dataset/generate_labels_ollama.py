@@ -30,7 +30,7 @@ class ReviewEvaluation(BaseModel):
     insight_score: int = Field(description="Score 0-100 based on domain-specific information density.")
     reasoning: str = Field(description="Brief analysis of the identified key points.")
 
-llm = ChatOllama(model=MODEL_NAME, temperature=0.7)
+llm = ChatOllama(model=MODEL_NAME, temperature=0.6)
 structured_llm = llm.with_structured_output(ReviewEvaluation)
 
 # Buffer for "memory" of recent scores
@@ -120,7 +120,7 @@ def process_dataset(source="restaurant"):
             return
 
         df = pd.read_csv(INPUT_AMAZON, usecols=['text', 'helpful_vote', 'category', 'rating'])
-
+        
     df_sample = df.sample(n=min(SAMPLE_SIZE, len(df))).copy()
     file_exists = os.path.exists(OUTPUT_CSV)
     
@@ -146,4 +146,4 @@ def process_dataset(source="restaurant"):
 
 if __name__ == "__main__":
     # Example execution for BnB
-    process_dataset(source="bnb")
+    process_dataset(source="amazon")

@@ -286,3 +286,38 @@ class ReviewDataset(Dataset):
         df = df.dropna(subset=required_cols).reset_index(drop=True)
         print(f"Dataset: {len(df)} rows, {df['category'].nunique()} categories")
         return df
+
+
+if __name__ == "__main__":
+    import os
+    import pandas as pd
+
+    # Default path used in ReviewDataset (relative to backend/dataset/ or root)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, "..", ".datasets", "reviews_labeled.csv")
+
+    if os.path.exists(csv_path):
+        print(f"Loading dataset from: {csv_path}")
+        df = pd.read_csv(csv_path)
+
+        def group_category(cat):
+            cat_str = str(cat).lower()
+            if cat_str in ["bnb", "restaurant"]:
+                return cat_str
+            return "amazon"
+
+        df["grouped_category"] = df["category"].apply(group_category)
+        counts = df["grouped_category"].value_counts()
+
+
+
+        print("\n" + "="*40)
+        print(f"{'CATEGORY':<20} | {'COUNT':<10}")
+        print("-" * 40)
+        for cat, count in counts.items():
+            print(f"{cat:<20} | {count:<10}")
+        print("="*40)
+        print(f"{'TOTAL':<20} | {len(df):<10}")
+        print("="*40)
+    else:
+        print(f"Dataset not found at: {csv_path}")

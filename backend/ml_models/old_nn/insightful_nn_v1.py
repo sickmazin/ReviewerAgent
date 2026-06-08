@@ -133,7 +133,7 @@ class HybridInsightSystem:
 
 # Esempio di utilizzo e test rapido
 if __name__ == "__main__":
-    MODEL_PATH = "models/insight_model_epoch_67.pth"
+    MODEL_PATH = "../../.weights/v1/insight_model_epoch_67.pth"
 
     # Mock category centroid (embedding medio di 768 dim per DeBERTa small)
     mock_centroid = np.random.randn(768)
