@@ -42,7 +42,7 @@ def plot_all(csv_path, output_dir):
         raise FileNotFoundError(f"CSV file not found at: {csv_path}")
         
     df = pd.read_csv(csv_path)
-    epochs = df["epoch"]
+    batchs = df["batch"]
     
     # -------------------------------------------------------------
     # PLOT 1: Loss Curves (Train vs Validation)
@@ -50,19 +50,19 @@ def plot_all(csv_path, output_dir):
     fig, ax = plt.subplots(figsize=(10, 6), facecolor=COLOR_BG)
     ax.set_facecolor("#ffffff")
     
-    ax.plot(epochs, df["train_loss"], label="Train Loss", color=COLOR_TRAIN, linewidth=2, marker='o', markersize=4, alpha=0.85)
-    ax.plot(epochs, df["val_loss"], label="Validation Loss", color=COLOR_VAL, linewidth=2, marker='s', markersize=4, alpha=0.85)
+    ax.plot(batchs, df["train_loss"], label="Train Loss", color=COLOR_TRAIN, linewidth=2, marker='o', markersize=4, alpha=0.85)
+    ax.plot(batchs, df["val_loss"], label="Validation Loss", color=COLOR_VAL, linewidth=2, marker='s', markersize=4, alpha=0.85)
     
     # Highlight the best val_loss checkpoint
     best_idx = df["val_loss"].idxmin()
-    best_epoch = df.loc[best_idx, "epoch"]
+    best_batch = df.loc[best_idx, "batch"]
     best_val_loss = df.loc[best_idx, "val_loss"]
     
-    ax.scatter(best_epoch, best_val_loss, color="#ef4444", s=120, zorder=5, edgecolors='black', label=f"Best Checkpoint (Ep. {best_epoch}: {best_val_loss:.4f})")
-    ax.axvline(best_epoch, color="#ef4444", linestyle="--", alpha=0.5, zorder=1)
+    ax.scatter(best_batch, best_val_loss, color="#ef4444", s=120, zorder=5, edgecolors='black', label=f"Best Checkpoint (Ep. {best_batch}: {best_val_loss:.4f})")
+    ax.axvline(best_batch, color="#ef4444", linestyle="--", alpha=0.5, zorder=1)
     
     ax.set_title("Training Loss Curves", pad=15, weight="bold")
-    ax.set_xlabel("Epoch", labelpad=10)
+    ax.set_xlabel("batch", labelpad=10)
     ax.set_ylabel("Loss", labelpad=10)
     ax.legend(frameon=True, facecolor="#ffffff", edgecolor="#e2e8f0")
     ax.grid(True, linestyle="--", alpha=0.7)
@@ -80,9 +80,9 @@ def plot_all(csv_path, output_dir):
     
     # MAE (left y-axis)
     color = COLOR_MAE
-    ax1.set_xlabel("Epoch", labelpad=10)
+    ax1.set_xlabel("batch", labelpad=10)
     ax1.set_ylabel("Validation MAE", color=color, labelpad=10, weight="bold")
-    line1 = ax1.plot(epochs, df["val_mae"], color=color, linewidth=2, marker='o', markersize=4, label="MAE (left)")
+    line1 = ax1.plot(batchs, df["val_mae"], color=color, linewidth=2, marker='o', markersize=4, label="MAE (left)")
     ax1.tick_params(axis='y', labelcolor=color)
     ax1.grid(True, linestyle="--", alpha=0.7)
     
@@ -90,14 +90,14 @@ def plot_all(csv_path, output_dir):
     ax2 = ax1.twinx()
     color = COLOR_PEARSON
     ax2.set_ylabel("Validation Pearson R", color=color, labelpad=10, weight="bold")
-    line2 = ax2.plot(epochs, df["val_r"], color=color, linewidth=2, marker='^', markersize=4, label="Pearson R (right)")
+    line2 = ax2.plot(batchs, df["val_r"], color=color, linewidth=2, marker='^', markersize=4, label="Pearson R (right)")
     ax2.tick_params(axis='y', labelcolor=color)
     
     # Best MAE and Pearson R
     best_mae_idx = df["val_mae"].idxmin()
     best_r_idx = df["val_r"].idxmax()
-    print(f"Best Validation MAE: {df.loc[best_mae_idx, 'val_mae']:.4f} at epoch {df.loc[best_mae_idx, 'epoch']}")
-    print(f"Best Pearson R: {df.loc[best_r_idx, 'val_r']:.4f} at epoch {df.loc[best_r_idx, 'epoch']}")
+    print(f"Best Validation MAE: {df.loc[best_mae_idx, 'val_mae']:.4f} at batch {df.loc[best_mae_idx, 'batch']}")
+    print(f"Best Pearson R: {df.loc[best_r_idx, 'val_r']:.4f} at batch {df.loc[best_r_idx, 'batch']}")
     
     # Merge legends
     lines = line1 + line2
@@ -121,11 +121,11 @@ def plot_all(csv_path, output_dir):
     available_components = [c for c in components if c in df.columns]
     
     for comp in available_components:
-        ax.plot(epochs, df[comp], label=comp.replace("val_l_", "Loss "), 
+        ax.plot(batchs, df[comp], label=comp.replace("val_l_", "Loss "), 
                 color=COLORS_COMPONENTS.get(comp, "#000000"), linewidth=1.8, marker='x', markersize=3, alpha=0.8)
                 
     ax.set_title("Trend of Individual Validation Loss Components", pad=15, weight="bold")
-    ax.set_xlabel("Epoch", labelpad=10)
+    ax.set_xlabel("batch", labelpad=10)
     ax.set_ylabel("Loss Component Value", labelpad=10)
     ax.legend(frameon=True, facecolor="#ffffff", edgecolor="#e2e8f0")
     ax.grid(True, linestyle="--", alpha=0.7)
@@ -136,24 +136,24 @@ def plot_all(csv_path, output_dir):
     print("Plot 3 saved: 3_loss_components.png")
 
     # -------------------------------------------------------------
-    # PLOT 4: Learning Rate Behavior within Epoch
+    # PLOT 4: Learning Rate Behavior within batch
     # -------------------------------------------------------------
     # Explanation and simulation of CosineAnnealingWarmRestarts
     # Analysis from training.py:
-    #   S (steps per epoch) = 3125 (calculated as data_samples / batch_size = 20000 / 1 or 50000 / 16, etc.)
-    #   For v7_frozen: S = 3125 batches (steps) per epoch.
+    #   S (steps per batch) = 3125 (calculated as data_samples / batch_size = 20000 / 1 or 50000 / 16, etc.)
+    #   For v7_frozen: S = 3125 batches (steps) per batch.
     #   scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=2, T_mult=3125, eta_min=1e-6)
     #
     # We simulate the LR behavior on a step (batch) scale
-    # to clearly show what happens within an epoch.
+    # to clearly show what happens within an batch.
     
-    S = 3125  # steps per epoch
-    T_0 = 2 * S   # T_0 = 2 epochs (6250 steps)
+    S = 3125  # steps per batch
+    T_0 = 2 * S   # T_0 = 2 batchs (6250 steps)
     T_mult = 2
     eta_max = 5e-5
     eta_min = 1e-8
     
-    # Generate steps for the first 5 epochs (0 to 5 * S)
+    # Generate steps for the first 5 batchs (0 to 5 * S)
     total_steps = 5 * S
     steps = np.arange(total_steps)
     lrs = np.zeros(total_steps)
@@ -177,51 +177,51 @@ def plot_all(csv_path, output_dir):
     ax_all.set_facecolor("#ffffff")
     ax_zoom.set_facecolor("#ffffff")
     
-    # Full plot (First 5 epochs, step-by-step)
-    epochs_axis = steps / S
-    ax_all.plot(epochs_axis, lrs, color="#3b82f6", linewidth=1.5, label="Learning Rate (Simulated)")
+    # Full plot (First 5 batchs, step-by-step)
+    batchs_axis = steps / S
+    ax_all.plot(batchs_axis, lrs, color="#3b82f6", linewidth=1.5, label="Learning Rate (Simulated)")
     
-    # Vertical lines to delimit epochs
+    # Vertical lines to delimit batchs
     for ep in range(1, 6):
         ax_all.axvline(ep, color="#94a3b8", linestyle=":", alpha=0.8)
-        ax_all.text(ep - 0.5, eta_max * 0.85, f"Epoch {ep}", ha="center", va="center", color="#475569", weight="bold", fontsize=9)
+        ax_all.text(ep - 0.5, eta_max * 0.85, f"batch {ep}", ha="center", va="center", color="#475569", weight="bold", fontsize=9)
         
-    ax_all.set_title("Batch-by-Batch Learning Rate Trend (First 5 Epochs)", weight="bold", pad=12)
+    ax_all.set_title("Batch-by-Batch Learning Rate Trend (First 5 batchs)", weight="bold", pad=12)
     ax_all.set_ylabel("Learning Rate", labelpad=10)
-    ax_all.set_xlabel("Epoch (fraction)", labelpad=5)
+    ax_all.set_xlabel("batch (fraction)", labelpad=5)
     ax_all.legend(frameon=True, facecolor="#ffffff", edgecolor="#e2e8f0")
     ax_all.grid(True, linestyle="--", alpha=0.7)
     
-    # Zoomed plot around Epoch 2 and 3 (steps from 5500 to 7000) to see transition and restart
+    # Zoomed plot around batch 2 and 3 (steps from 5500 to 7000) to see transition and restart
     zoom_start = 5500
     zoom_end = 7000
     ax_zoom.plot(steps[zoom_start:zoom_end] / S, lrs[zoom_start:zoom_end], color="#ef4444", linewidth=2, label="Transition / Restart (Zoom)")
     
-    # Highlight restart at epoch 2.0 (step 6250)
-    ax_zoom.axvline(2.0, color="#059669", linestyle="--", alpha=0.8, label="Warm Restart (Epoch 2.0)")
+    # Highlight restart at batch 2.0 (step 6250)
+    ax_zoom.axvline(2.0, color="#059669", linestyle="--", alpha=0.8, label="Warm Restart (batch 2.0)")
     
-    ax_zoom.set_title("Transition Detail and Warm Restart at Beginning of Epoch 3", weight="bold", pad=12)
+    ax_zoom.set_title("Transition Detail and Warm Restart at Beginning of batch 3", weight="bold", pad=12)
     ax_zoom.set_ylabel("Learning Rate", labelpad=10)
-    ax_zoom.set_xlabel("Epoch (fraction)", labelpad=10)
+    ax_zoom.set_xlabel("batch (fraction)", labelpad=10)
     ax_zoom.legend(frameon=True, facecolor="#ffffff", edgecolor="#e2e8f0")
     ax_zoom.grid(True, linestyle="--", alpha=0.7)
     
     # Explanatory annotation
     explanation_text = (
         "NOTE:\n"
-        "1. The scheduler is set with T_0 = 2 epochs (6250 steps) and T_mult = 2.\n"
-        "2. The learning rate oscillates smoothly and continuously *within* each epoch (batch-by-batch).\n"
-        "3. The first cycle lasts exactly 2 epochs, reaching the minimum (eta_min = 1e-8) at the end of Epoch 2.\n"
-        "4. At the beginning of Epoch 3, the restart to eta_max (5e-5) occurs.\n"
-        "5. The second cycle lasts 2 * 2 = 4 epochs (ending at the end of Epoch 6)."
+        "1. The scheduler is set with T_0 = 2 batchs (6250 steps) and T_mult = 2.\n"
+        "2. The learning rate oscillates smoothly and continuously *within* each batch (batch-by-batch).\n"
+        "3. The first cycle lasts exactly 2 batchs, reaching the minimum (eta_min = 1e-8) at the end of batch 2.\n"
+        "4. At the beginning of batch 3, the restart to eta_max (5e-5) occurs.\n"
+        "5. The second cycle lasts 2 * 2 = 4 batchs (ending at the end of batch 6)."
     )
     fig.text(0.12, 0.02, explanation_text, fontsize=9.5, color="#1e293b", 
              bbox=dict(facecolor="#f1f5f9", edgecolor="#cbd5e1", boxstyle="round,pad=0.8"))
              
     plt.subplots_adjust(bottom=0.22, hspace=0.35)
-    fig.savefig(os.path.join(output_dir, "4_learning_rate_epoch.png"), bbox_inches="tight")
+    fig.savefig(os.path.join(output_dir, "4_learning_rate_batch.png"), bbox_inches="tight")
     plt.close(fig)
-    print("Plot 4 saved: 4_learning_rate_epoch.png")
+    print("Plot 4 saved: 4_learning_rate_batch.png")
 
 if __name__ == "__main__":
     # Paths relative to the script folder
