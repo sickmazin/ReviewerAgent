@@ -30,7 +30,7 @@ def plot_benchmark_results(csv_path: str):
     # ---------------------------------------------------------
     ax_time = axes[0, 0]
     avg_times = [df['time_insight'].mean(), df['time_gemini'].mean(), df['time_ollama'].mean()]
-    models = ['Insightfulness (Local)', 'Gemini 1.5 Flash', 'Ollama Cloud']
+    models = ['Insightfulness (Local)', 'Gemini 3.1 Flash', 'Ollama Cloud']
     colors = ['#4c72b0', '#dd8452', '#55a868']
     
     bars = ax_time.bar(models, avg_times, color=colors)
