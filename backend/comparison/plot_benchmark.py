@@ -23,14 +23,14 @@ def plot_benchmark_results(csv_path: str):
     # Stile generale
     sns.set_theme(style="whitegrid", palette="muted")
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    fig.suptitle("Insightfulness Model vs Cloud LLMs Benchmark", fontsize=18, fontweight='bold')
+    fig.suptitle("DeBERTa Fine Tuned vs Cloud LLMs Benchmark", fontsize=18, fontweight='bold')
 
     # ---------------------------------------------------------
     # 1. Mean Average Time (Bar Plot)
     # ---------------------------------------------------------
     ax_time = axes[0, 0]
     avg_times = [df['time_insight'].mean(), df['time_gemini'].mean(), df['time_ollama'].mean()]
-    models = ['Insightfulness (Local)', 'Gemini 3.1 Flash', 'Ollama Cloud']
+    models = ['DeBERTa Fine Tuned', 'Gemini 3.1 Flash', 'GPT-oss:120B']
     colors = ['#4c72b0', '#dd8452', '#55a868']
     
     bars = ax_time.bar(models, avg_times, color=colors)
@@ -52,16 +52,16 @@ def plot_benchmark_results(csv_path: str):
     diff_ollama = df['score_insight'] - df['score_ollama']
     
     sns.histplot(diff_gemini, kde=True, ax=ax_diff, color='#dd8452', label='vs Gemini', alpha=0.5)
-    sns.histplot(diff_ollama, kde=True, ax=ax_diff, color='#55a868', label='vs Ollama', alpha=0.5)
+    sns.histplot(diff_ollama, kde=True, ax=ax_diff, color='#55a868', label='vs GPT-oss', alpha=0.5)
     
     # Calcola deviazione standard e media della differenza
     std_gemini = diff_gemini.std()
     std_ollama = diff_ollama.std()
     
-    ax_diff.set_title('Score Differences (Insightfulness - Cloud)', fontsize=14)
+    ax_diff.set_title('Score Differences (DeBERTa FT - Cloud)', fontsize=14)
     ax_diff.set_xlabel('Score Difference')
     ax_diff.set_ylabel('Frequency')
-    ax_diff.legend(title=f"Std Dev vs Gemini: {std_gemini:.2f}\nStd Dev vs Ollama: {std_ollama:.2f}")
+    ax_diff.legend(title=f"Std Dev vs Gemini: {std_gemini:.2f}\nStd Dev vs GPT-oss: {std_ollama:.2f}")
 
     # ---------------------------------------------------------
     # 3. Correlation Scatter Plot
@@ -69,7 +69,7 @@ def plot_benchmark_results(csv_path: str):
     ax_corr = axes[1, 0]
     
     sns.scatterplot(x='score_insight', y='score_gemini', data=df, ax=ax_corr, color='#dd8452', label='Gemini', s=60, alpha=0.7)
-    sns.scatterplot(x='score_insight', y='score_ollama', data=df, ax=ax_corr, color='#55a868', label='Ollama', s=60, alpha=0.7, marker='X')
+    sns.scatterplot(x='score_insight', y='score_ollama', data=df, ax=ax_corr, color='#55a868', label='GPT-oss', s=60, alpha=0.7, marker='X')
     
     # Linea perfetta concordanza
     lims = [
@@ -83,9 +83,9 @@ def plot_benchmark_results(csv_path: str):
     corr_ollama = df['score_insight'].corr(df['score_ollama'])
     
     ax_corr.set_title('Score Correlation (Local vs Cloud)', fontsize=14)
-    ax_corr.set_xlabel('Insightfulness (Local Model) Score')
+    ax_corr.set_xlabel('DeBERTa Fine Tuned Score')
     ax_corr.set_ylabel('Cloud LLM Score')
-    ax_corr.legend(title=f"Pearson vs Gemini: {corr_gemini:.2f}\nPearson vs Ollama: {corr_ollama:.2f}")
+    ax_corr.legend(title=f"Pearson vs Gemini: {corr_gemini:.2f}\nPearson vs GPT-oss: {corr_ollama:.2f}")
 
     # ---------------------------------------------------------
     # 4. Boxplot of Scores (Distribution Spread)
@@ -93,9 +93,9 @@ def plot_benchmark_results(csv_path: str):
     ax_box = axes[1, 1]
     
     score_data = pd.DataFrame({
-        'Insightfulness': df['score_insight'],
+        'DeBERTa FT': df['score_insight'],
         'Gemini': df['score_gemini'],
-        'Ollama': df['score_ollama']
+        'GPT-oss': df['score_ollama']
     })
     
     sns.boxplot(data=score_data, ax=ax_box, palette=colors)
