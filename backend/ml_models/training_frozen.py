@@ -17,15 +17,15 @@ if __name__ == "__main__":
     train_model(
         csv_path                ="../.datasets/reviews_labeled.csv",
         model_name              = "microsoft/deberta-v3-large",
-        epochs                  = 200,
+        epochs                  = 2000,
         batch_size              = 1,     # Batch size can be increased as the encoder is frozen
-        lr                      = 5e-6,     # Higher LR (1e-4 or 5e-4) as we only train the heads
-        accumulation_steps      = 16,      # Less accumulation needed
+        lr                      = 5e-5,     # Higher LR (1e-4 or 5e-4) as we only train the heads
+        accumulation_steps      = 32,      # Less accumulation needed
         val_split               = 0.1,
         early_stopping_patience = 15,
         checkpoint_dir          ="../.weights/v7_frozen",
         load_model              = None,
-        freeze_encoder          = True,   # <--- Key parameter
+        freeze_encoder          = False,   # <--- Key parameter
         # Loss weights (balanced)
         alpha    = 0.50,    # distillation
         beta     = 0.15,    # factuality

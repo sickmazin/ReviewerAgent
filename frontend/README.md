@@ -1,7 +1,7 @@
 
   # Main screen design
 
-  This is a code bundle for Main screen design. The original project is available at https://www.figma.com/design/L5vSnsCTQQEcAobFlRMkql/Main-screen-design.
+  This is a code bundle for Main screen design.
 
   ## Running the code
 
