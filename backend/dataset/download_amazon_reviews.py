@@ -4,7 +4,7 @@ from huggingface_hub import HfApi
 from tqdm import tqdm
 import os
 
-from backend.dataset.config import OUTPUT_DIR, REPO_ID, TOTAL_LIMIT, OUTPUT_FILE
+from dataset.config import OUTPUT_DIR, REPO_ID, TOTAL_LIMIT, OUTPUT_FILE
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)

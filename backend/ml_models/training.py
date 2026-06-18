@@ -36,7 +36,7 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 from torch.utils.data import SubsetRandomSampler
 
-from backend.dataset.dataset import N_LEXICAL_FEATS, ReviewDataset
+from dataset.dataset import N_LEXICAL_FEATS, ReviewDataset
 from insightfulness_nn import InsightReviewScorer, compute_insight_loss
 
 # ============================================================

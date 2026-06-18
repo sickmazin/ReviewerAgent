@@ -4,10 +4,10 @@
 
 from __future__ import annotations
 from typing import Optional
-from backend.ml_models.rag_and_compliance.compliance_checker import ComplianceChecker
-from backend.ml_models.rag_and_compliance.config import GUIDELINES_PATH
-from backend.ml_models.rag_and_compliance.guideline_retriever import GuidelineStore,LightEmbedder,GuidelineRetriever
-from backend.ml_models.rag_and_compliance.output_schema_llm import TextAnalysisResponse,Issue,ComplianceResult
+from ml_models.rag_and_compliance.compliance_checker import ComplianceChecker
+from ml_models.rag_and_compliance.config import GUIDELINES_PATH
+from ml_models.rag_and_compliance.guideline_retriever import GuidelineStore,LightEmbedder,GuidelineRetriever
+from ml_models.rag_and_compliance.output_schema_llm import TextAnalysisResponse,Issue,ComplianceResult
 
 
 class ReviewRAGSystem:

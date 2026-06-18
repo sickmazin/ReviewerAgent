@@ -7,7 +7,7 @@ from tqdm import tqdm
 import os
 
 # --- CONFIGURATION ---
-from backend.dataset.config import MODEL_NAME, INPUT_AMAZON, INPUT_RESTAURANT, INPUT_BNB, OUTPUT_CSV, SAMPLE_SIZE
+from dataset.config import MODEL_NAME, INPUT_AMAZON, INPUT_RESTAURANT, INPUT_BNB, OUTPUT_CSV, SAMPLE_SIZE
 
 # Domain-specific criteria mapping
 DOMAIN_KNOWLEDGE = {

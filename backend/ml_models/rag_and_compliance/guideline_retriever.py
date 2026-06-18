@@ -23,7 +23,7 @@ import numpy as np
 import torch
 from transformers import AutoModel, AutoTokenizer
 
-from backend.ml_models.rag_and_compliance.config import FALLBACK_MODELS,GUIDELINES_PATH
+from ml_models.rag_and_compliance.config import FALLBACK_MODELS,GUIDELINES_PATH
 
 
 # ============================================================

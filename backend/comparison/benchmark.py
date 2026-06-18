@@ -9,8 +9,8 @@ import dotenv
 # Aggiungi la root del progetto al path per gli import
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from backend.ml_models.Insightfulness_Model import Insightfulness
-from backend.comparison.gemini import get_gemini_score
+from ml_models.Insightfulness_Model import Insightfulness
+from comparison.gemini import get_gemini_score
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 

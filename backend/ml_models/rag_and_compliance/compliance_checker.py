@@ -7,10 +7,10 @@ from typing import Optional,List
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 
-from backend.ml_models.rag_and_compliance.config import MODEL_NAME,PHONE_RE,EMAIL_RE,URL_RE,GRAMMAR_PROMPT, \
+from ml_models.rag_and_compliance.config import MODEL_NAME,PHONE_RE,EMAIL_RE,URL_RE,GRAMMAR_PROMPT, \
     GUIDELINES_PROMPT,CAPS_RE
-from backend.ml_models.rag_and_compliance.guideline_retriever import GuidelineRetriever
-from backend.ml_models.rag_and_compliance.output_schema_llm import TextAnalysisResponse,Issue,GuidelinesEvaluation, \
+from ml_models.rag_and_compliance.guideline_retriever import GuidelineRetriever
+from ml_models.rag_and_compliance.output_schema_llm import TextAnalysisResponse,Issue,GuidelinesEvaluation, \
     ComplianceResult
 
 

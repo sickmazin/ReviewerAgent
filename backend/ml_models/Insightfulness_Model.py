@@ -2,10 +2,10 @@ from typing import Optional
 import torch
 from transformers import AutoTokenizer
 
-from backend.ml_models.rag_and_compliance.rag_system import ReviewRAGSystem
+from ml_models.rag_and_compliance.rag_system import ReviewRAGSystem
 from .insightfulness_nn import InsightReviewScorer
 
-class Insightfulness():
+class Insightfulness:
     """
         Full model of Insightfulness network.
         Is formed by InsightReviewScorer and Rag-Checker Model.

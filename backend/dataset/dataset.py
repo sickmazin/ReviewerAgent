@@ -6,7 +6,7 @@ import spacy
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
-from backend.ml_models.insightfulness_nn import InsightReviewScorer
+from ml_models.insightfulness_nn import InsightReviewScorer
 
 
 # ============================================================
@@ -291,33 +291,58 @@ class ReviewDataset(Dataset):
 if __name__ == "__main__":
     import os
     import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
 
     # Default path used in ReviewDataset (relative to backend/dataset/ or root)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(base_dir, "..", ".datasets", "reviews_labeled.csv")
+    processed_csv = csv_path.replace(".csv", "_processed.csv")
 
-    if os.path.exists(csv_path):
-        print(f"Loading dataset from: {csv_path}")
+    if os.path.exists(processed_csv):
+        print(f"Loading processed dataset from: {processed_csv}")
+        df = pd.read_csv(processed_csv)
+
+        # 1. Basic Stats
+        print("\n" + "="*40)
+        print(" FACTUALITY SIGNAL ANALYSIS")
+        print("="*40)
+        stats = df["factuality_signal"].describe()
+        print(stats)
+        print("-" * 40)
+
+        # 2. Distribution Plot
+        plt.figure(figsize=(10, 6))
+        sns.histplot(df["factuality_signal"], bins=30, kde=True, color="teal")
+        plt.title("Distribution of Factuality Signal (Proxy)")
+        plt.xlabel("Factuality Score [0-1]")
+        plt.ylabel("Frequency")
+        plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+        # Ensure plots directory exists
+        plot_dir = os.path.join(base_dir, "plots")
+        os.makedirs(plot_dir, exist_ok=True)
+        plot_path = os.path.join(plot_dir, "factuality_dist.png")
+        plt.savefig(plot_path)
+        print(f"Plot saved to: {plot_path}")
+
+        # 3. Category analysis
+        print("\nMean Factuality by Category:")
+        cat_fact = df.groupby("category")["factuality_signal"].mean().sort_values(ascending=False)
+        for cat, val in cat_fact.items():
+            print(f"{cat:<20} | {val:.4f}")
+        print("="*40)
+
+    elif os.path.exists(csv_path):
+        print(f"Processed dataset not found at {processed_csv}. Please run the preprocessing first.")
+        # Fallback to basic counting for the raw CSV
         df = pd.read_csv(csv_path)
-
-        def group_category(cat):
-            cat_str = str(cat).lower()
-            if cat_str in ["bnb", "restaurant"]:
-                return cat_str
-            return "amazon"
-
-        df["grouped_category"] = df["category"].apply(group_category)
-        counts = df["grouped_category"].value_counts()
-
-
-
+        counts = df["category"].value_counts()
         print("\n" + "="*40)
         print(f"{'CATEGORY':<20} | {'COUNT':<10}")
         print("-" * 40)
         for cat, count in counts.items():
             print(f"{cat:<20} | {count:<10}")
-        print("="*40)
-        print(f"{'TOTAL':<20} | {len(df):<10}")
         print("="*40)
     else:
         print(f"Dataset not found at: {csv_path}")
